@@ -55,10 +55,8 @@ export function HeroSection() {
            </p>
 
            <div className="flex relative">
-             <motion.div 
-               animate={{ x: [0, -1035] }} 
-               transition={{ repeat: Infinity, duration: 30, ease: 'linear' }}
-               className="flex whitespace-nowrap opacity-40 hover:opacity-100 transition-opacity duration-500 items-center"
+             <div 
+               className="flex whitespace-nowrap opacity-40 hover:opacity-100 transition-opacity duration-500 items-center animate-[marquee_30s_linear_infinite]"
              >
                {[
                  'Next.js', 'NestJS', 'PostgreSQL', 'Prisma', 'Tailwind CSS', 'Docker', 'AWS', 'Vercel', 'Supabase', 'Stripe', 'React', 'TypeScript', 'Redis', 'GraphQL',
@@ -69,7 +67,7 @@ export function HeroSection() {
                    <span className="mx-8 w-1.5 h-1.5 rounded-full bg-zinc-800" />
                  </div>
                ))}
-             </motion.div>
+             </div>
            </div>
         </motion.div>
       </div>
