@@ -15,10 +15,8 @@ export class PolarService {
   async createCheckoutSession(userId: string, tier: string) {
     // 1. Map tiers to Polar product IDs (you will get these from Polar dashboard)
     const productMapping: Record<string, string> = {
-      'MVP': process.env.POLAR_MVP_PRODUCT_ID || '',
       'Startup': process.env.POLAR_STARTUP_PRODUCT_ID || '',
       'Professional': process.env.POLAR_PROFESSIONAL_PRODUCT_ID || '',
-      'Enterprise': process.env.POLAR_ENTERPRISE_PRODUCT_ID || '',
     };
 
     const productId = productMapping[tier];
