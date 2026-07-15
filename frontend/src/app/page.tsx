@@ -28,6 +28,7 @@ export default function Home() {
           <div className="flex gap-4">
             <a href="#" className="text-sm text-zinc-400 hover:text-white">Terms</a>
             <a href="#" className="text-sm text-zinc-400 hover:text-white">Privacy</a>
+            <a href="mailto:contact@stackgen.site" className="text-sm text-zinc-400 hover:text-white">Contact</a>
           </div>
         </div>
       </footer>
