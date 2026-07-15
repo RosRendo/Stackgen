@@ -12,8 +12,8 @@ export function Header() {
     <header className="fixed top-0 inset-x-0 z-50 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <div className="w-8 h-8 rounded-md bg-zinc-100 flex items-center justify-center">
-            <span className="text-zinc-900 font-bold text-lg">S</span>
+          <div className="w-8 h-8 rounded-md overflow-hidden flex items-center justify-center">
+            <img src="/logo.png" alt="StackGen Logo" className="w-full h-full object-cover" />
           </div>
           <span className="text-xl font-semibold tracking-tight text-zinc-100">StackGen</span>
         </Link>
