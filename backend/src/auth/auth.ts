@@ -38,5 +38,5 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }
   },
-  trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+  trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000', 'https://stackgen.site', 'https://www.stackgen.site'],
 });

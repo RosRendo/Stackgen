@@ -18,7 +18,7 @@ async function bootstrap() {
 
   // Strict CORS for production (fallback to localhost for dev)
   const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://softwarebp.com']
+    ? [process.env.FRONTEND_URL || 'https://softwarebp.com', 'https://stackgen.site', 'https://www.stackgen.site']
     : ['http://localhost:3000'];
 
   app.enableCors({
