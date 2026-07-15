@@ -1,20 +1,18 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import OpenAI from 'openai';
-import { zodResponseFormat } from 'openai/helpers/zod';
-import { z } from 'zod';
+import { GoogleGenAI } from '@google/genai';
 
 @Injectable()
 export class AiService {
-  private openai: OpenAI;
+  private ai: GoogleGenAI;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || 'dummy_key',
+    this.ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY || 'dummy_key',
     });
   }
 
   async generateBlueprint(projectName: string, description: string, level: string, useMock: boolean = false) {
-    if (useMock || !process.env.OPENAI_API_KEY) {
+    if (useMock || !process.env.GEMINI_API_KEY) {
       // Mock response if no key is provided, so the UI still works
       const mockResponses: Record<string, any> = {
         MVP: {
@@ -151,63 +149,55 @@ export class AiService {
       };
     }
 
-    const BlueprintSchema = z.object({
-      techStack: z.array(z.object({
-        name: z.string(),
-        simpleIconSlug: z.string().describe("the exact lowercase slug for simpleicons.org, e.g. 'react', 'nextdotjs', 'postgresql', 'tailwindcss'. If no exact match is known, use a closely related slug or empty string"),
-        rationale: z.string().describe("short explanation of why this was chosen for this specific project"),
-        category: z.string().describe("Frontend, Backend, Database, DevOps, Security, or Testing")
-      })),
-      checklist: z.array(z.object({
-        id: z.string().describe("unique uuid or string id"),
-        category: z.string().describe("Frontend, Backend, Database, DevOps, Security, or Testing"),
-        title: z.string().describe("actionable task title"),
-        description: z.string().describe("detailed 2-3 sentence explanation of specific implementation steps"),
-        relatedTech: z.array(z.string()),
-        status: z.string().describe("always set to 'TODO'")
-      })).describe("generate a highly detailed list of at least 10-15 specific tasks tailored to their exact project description"),
-      nodes: z.array(z.object({
-        id: z.string(),
-        position: z.object({ x: z.number(), y: z.number() }),
-        data: z.object({ label: z.string().describe("MUST clearly map to 'Frontend', 'Backend', 'Database', or 'DevOps' for categorization") })
-      })).describe("MUST create a system architecture graph. Distinct IDs, positioned sequentially on the Y axis (y: 0, 150, 300, 450) and X axis (x: 250). Do NOT return empty arrays."),
-      edges: z.array(z.object({
-        id: z.string(),
-        source: z.string(),
-        target: z.string(),
-        animated: z.boolean(),
-        style: z.object({ stroke: z.string() })
-      }))
-    });
-
     const prompt = `
       You are an expert Software Architect. A user wants to build a project called "${projectName}".
       Description: "${description}"
       Complexity Level: "${level}" (MVP, Startup, Professional, Enterprise).
 
-      Please generate a highly detailed system architecture blueprint following the provided schema.
+      Please generate a highly detailed system architecture blueprint.
+      
+      You MUST return exactly a JSON object (and nothing else, no markdown wrappers) matching this schema:
+      {
+        "techStack": [
+          { "name": "string", "simpleIconSlug": "string (lowercase icon slug for simpleicons.org)", "rationale": "string", "category": "Frontend, Backend, Database, DevOps, Security, or Testing" }
+        ],
+        "checklist": [
+          { "id": "string", "category": "string", "title": "string", "description": "string", "relatedTech": ["string"], "status": "TODO" }
+        ],
+        "nodes": [
+          { "id": "string", "position": { "x": number, "y": number }, "data": { "label": "string" } }
+        ],
+        "edges": [
+          { "id": "string", "source": "string", "target": "string" }
+        ]
+      }
+      
+      For nodes, ensure distinct IDs and sequential positioning on the Y axis (y: 0, 150, 300, 450) and X axis (x: 250). Do NOT return empty arrays.
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-2024-08-06',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: zodResponseFormat(BlueprintSchema, 'blueprint_response')
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json"
+        }
       });
 
-      const parsedData = JSON.parse(response.choices[0].message.content || '{}');
+      const parsedData = JSON.parse(response.text || '{}');
 
       return {
         data: parsedData,
-        usage: response.usage?.total_tokens || 0
+        usage: 1000 // Mock usage for now
       };
     } catch (error) {
+      console.error(error);
       throw new HttpException('Failed to generate blueprint', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async generateTaskPrompt(taskTitle: string, techStack: string[], useMock: boolean = false) {
-    if (useMock || !process.env.OPENAI_API_KEY) {
+    if (useMock || !process.env.GEMINI_API_KEY) {
       const isDevOps = taskTitle.toLowerCase().includes('docker') || taskTitle.toLowerCase().includes('kubernetes') || taskTitle.toLowerCase().includes('cluster');
       const isDb = taskTitle.toLowerCase().includes('postgres') || taskTitle.toLowerCase().includes('redis') || taskTitle.toLowerCase().includes('schema');
       
@@ -244,7 +234,7 @@ export class AiService {
 
       return {
         data: {
-          prompt: `[NOTE: This is a mocked AI response because you are on the Free Tier or OPENAI_API_KEY is not set. Upgrade to a paid plan for dynamic, task-specific AI generation!]
+          prompt: `[NOTE: This is a mocked AI response because you are on the Free Tier or GEMINI_API_KEY is not set. Upgrade to a paid plan for dynamic, task-specific AI generation!]
 
 You are an expert developer using ${techStack.join(', ')}.
 
@@ -289,25 +279,28 @@ ${dynamicTree}
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
       });
 
-      const parsed = JSON.parse(response.choices[0].message.content || '{}');
+      const parsed = JSON.parse(response.text || '{}');
       return {
         data: parsed,
-        usage: response.usage?.total_tokens || 0
+        usage: 1000
       };
     } catch (error) {
+      console.error(error);
       throw new HttpException('Failed to generate task prompt', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async chat(message: string, context: any) {
-    if (!process.env.OPENAI_API_KEY) {
-      return { reply: `I am your CTO Assistant. You said: "${message}". Please add an OpenAI API Key to get real AI responses!` };
+    if (!process.env.GEMINI_API_KEY) {
+      return { reply: `I am your CTO Assistant. You said: "${message}". Please add a Gemini API Key to get real AI responses!` };
     }
 
     const systemPrompt = `
@@ -319,22 +312,20 @@ ${dynamicTree}
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ]
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `${systemPrompt}\n\nUser: ${message}`
       });
 
-      return { reply: response.choices[0].message.content };
+      return { reply: response.text };
     } catch (error) {
+      console.error(error);
       throw new HttpException('Failed to chat', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async generateDocs(projectName: string, description: string, techStack: any[], nodes: any[]) {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return {
         readme: `# ${projectName}\n\n${description}\n\n## Tech Stack\n${techStack.map(t => `- ${t.name}`).join('\n')}`,
         architecture: `# Architecture\n\nGenerated for ${projectName}.`
@@ -357,20 +348,23 @@ ${dynamicTree}
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      return JSON.parse(response.text || '{}');
     } catch (error) {
+      console.error(error);
       throw new HttpException('Failed to generate docs', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async scanGithub(githubUrl: string) {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return {
         score: { overall: 75, security: 60, devops: 80, architecture: 85 },
         findings: [
@@ -381,7 +375,6 @@ ${dynamicTree}
     }
 
     try {
-      // 1. Parse URL to get owner and repo
       let owner = '';
       let repo = '';
       const urlParts = githubUrl.split('github.com/');
@@ -393,7 +386,6 @@ ${dynamicTree}
         throw new Error('Invalid GitHub URL');
       }
 
-      // 2. Fetch package.json
       let packageJsonContent = '';
       try {
         const pkgUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/package.json`;
@@ -410,7 +402,6 @@ ${dynamicTree}
         console.warn('Could not fetch package.json', err);
       }
 
-      // 3. Prompt OpenAI
       const prompt = `
         You are an expert DevSecOps and Software Architect. I want you to evaluate a GitHub repository for Production Readiness.
         Repo: ${owner}/${repo}
@@ -428,13 +419,15 @@ ${dynamicTree}
         }
       `;
 
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      return JSON.parse(response.text || '{}');
     } catch (error) {
       console.error(error);
       throw new HttpException('Failed to scan GitHub repo', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -442,7 +435,7 @@ ${dynamicTree}
   }
 
   async estimateCost(level: string, techStack: any[]) {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return {
         totalMonthly: 45,
         breakdown: [
@@ -471,13 +464,15 @@ ${dynamicTree}
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      return JSON.parse(response.text || '{}');
     } catch (error) {
       console.error(error);
       throw new HttpException('Failed to estimate costs', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -485,7 +480,7 @@ ${dynamicTree}
   }
 
   async generateBoilerplate(projectName: string, techStack: any[]) {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return {
         files: [
           { path: 'package.json', content: '{\n  "name": "mock-app"\n}' },
@@ -509,13 +504,15 @@ ${dynamicTree}
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
       });
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+      return JSON.parse(response.text || '{}');
     } catch (error) {
       console.error(error);
       throw new HttpException('Failed to generate boilerplate', HttpStatus.INTERNAL_SERVER_ERROR);
