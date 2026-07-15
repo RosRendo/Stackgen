@@ -1,8 +1,11 @@
 import { HeroSection } from '@/components/marketing/hero';
-import { FeaturesSection } from '@/components/marketing/features';
-import { PricingSection } from '@/components/marketing/pricing';
 import { Header } from '@/components/marketing/header';
-import { ShowcaseSection } from '@/components/marketing/showcase';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+
+const ShowcaseSection = dynamic(() => import('@/components/marketing/showcase').then(mod => mod.ShowcaseSection));
+const FeaturesSection = dynamic(() => import('@/components/marketing/features').then(mod => mod.FeaturesSection));
+const PricingSection = dynamic(() => import('@/components/marketing/pricing').then(mod => mod.PricingSection));
 
 export default function Home() {
   return (
@@ -18,7 +21,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-md overflow-hidden flex items-center justify-center">
-              <img src="/logo.png" alt="StackGen Logo" className="w-full h-full object-cover" />
+              <Image src="/logo.png" alt="StackGen Logo" width={32} height={32} className="w-full h-full object-cover" />
             </div>
             <span className="text-xl font-semibold tracking-tight text-zinc-100">StackGen</span>
           </div>
