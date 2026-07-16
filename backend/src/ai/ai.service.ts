@@ -12,135 +12,259 @@ export class AiService {
   }
 
   private getMockBlueprint(level: string) {
-    const mockResponses: Record<string, any> = {
+    const blueprints: Record<string, any> = {
+
+      // ─────────────────────────────────────────────────────────────
+      // MVP  — Ship fast, validate idea, solo / 1–2 person team
+      // ─────────────────────────────────────────────────────────────
       MVP: {
         techStack: [
-          { name: 'Next.js', simpleIconSlug: 'nextdotjs', rationale: 'Fast, SEO-friendly React framework.', category: 'Frontend' },
-          { name: 'Supabase', simpleIconSlug: 'supabase', rationale: 'All-in-one Backend-as-a-Service for rapid MVP delivery.', category: 'Database' },
-          { name: 'Vercel', simpleIconSlug: 'vercel', rationale: 'Zero-config deployment.', category: 'DevOps' }
+          // Frontend
+          { name: 'Next.js',      simpleIconSlug: 'nextdotjs',   rationale: 'Full-stack React framework with App Router & SSR out of the box.',       category: 'Frontend' },
+          { name: 'Tailwind CSS', simpleIconSlug: 'tailwindcss', rationale: 'Utility-first CSS. No separate stylesheet needed — fast prototyping.', category: 'Frontend' },
+          { name: 'Shadcn UI',    simpleIconSlug: 'shadcnui',    rationale: 'Copy-paste accessible components built on Radix UI — no npm bloat.',     category: 'Frontend' },
+          // Database / Backend
+          { name: 'Supabase',     simpleIconSlug: 'supabase',    rationale: 'All-in-one BaaS — PostgreSQL DB, Auth, Storage, and Realtime in one.',   category: 'Database' },
+          // DevOps
+          { name: 'Vercel',       simpleIconSlug: 'vercel',      rationale: 'Zero-config git-push deploy with preview URLs on every pull request.',    category: 'DevOps'   },
+          // Testing
+          { name: 'Vitest',       simpleIconSlug: 'vitest',      rationale: 'Lightning-fast unit testing with native ESM support, no config needed.', category: 'Testing'  },
         ],
         checklist: [
-          { id: '1', category: 'Frontend', title: 'Setup Next.js with App Router & Tailwind', description: 'Initialize the Next.js workspace using create-next-app. Configure Tailwind CSS design tokens (colors, typography) in tailwind.config.ts. Setup the global RootLayout and implement a responsive navigation header.', relatedTech: ['Next.js', 'Tailwind CSS'], status: 'TODO' },
-          { id: '2', category: 'Frontend', title: 'Implement Base UI Components', description: 'Create atomic, accessible UI components (Buttons, Inputs, Cards, Modals) using Shadcn UI. Ensure all components support dark mode and strictly follow WCAG accessibility guidelines.', relatedTech: ['React', 'Tailwind CSS', 'Radix UI'], status: 'TODO' },
-          { id: '3', category: 'Database', title: 'Configure Supabase Auth & Schema', description: 'Create a new Supabase project. Setup email/password authentication and OAuth providers (Google/GitHub). Design the initial PostgreSQL schema and write Row Level Security (RLS) policies to protect user data.', relatedTech: ['Supabase', 'PostgreSQL'], status: 'TODO' },
-          { id: '4', category: 'DevOps', title: 'Configure Vercel CI/CD Pipeline', description: 'Link the GitHub repository to a new Vercel project. Configure build settings, set up production environment variables securely, and verify the automated preview deployments on pull requests.', relatedTech: ['Vercel', 'GitHub Actions'], status: 'TODO' }
+          // ── Frontend ──
+          { id: 'mvp-f1', category: 'Frontend', title: 'Init Next.js project & configure Tailwind', description: 'Run `npx create-next-app@latest`. Set up Tailwind v4 and configure the global CSS file with your brand colors, font (e.g., Inter via next/font), and dark mode class.', relatedTech: ['Next.js', 'Tailwind CSS'], status: 'TODO' },
+          { id: 'mvp-f2', category: 'Frontend', title: 'Install & configure Shadcn UI', description: 'Run `npx shadcn@latest init`. Add Button, Card, Input, Label, Dialog, and Toast components. Set up the global Toaster in your root layout.', relatedTech: ['Shadcn UI', 'Radix UI'], status: 'TODO' },
+          { id: 'mvp-f3', category: 'Frontend', title: 'Build core pages & navigation', description: 'Create `/` (landing), `/dashboard`, `/auth/login`, and `/auth/signup` pages. Build a responsive Navbar and Sidebar using Shadcn components. Add a 404 and loading skeleton.', relatedTech: ['Next.js', 'Tailwind CSS'], status: 'TODO' },
+          // ── Database / Auth ──
+          { id: 'mvp-d1', category: 'Database', title: 'Setup Supabase project & schema', description: 'Create a Supabase project. In the Table Editor, create your core tables (e.g. `profiles`, `items`). Enable Row Level Security on all tables. Add `.env.local` with your Supabase URL and anon key.', relatedTech: ['Supabase', 'PostgreSQL'], status: 'TODO' },
+          { id: 'mvp-d2', category: 'Database', title: 'Configure Supabase Auth (OAuth + Email)', description: 'Enable Email/Password and Google OAuth in Supabase Auth settings. Create a Next.js middleware to protect `/dashboard` routes. Handle sessions with `@supabase/ssr`.', relatedTech: ['Supabase', 'Next.js'], status: 'TODO' },
+          // ── DevOps ──
+          { id: 'mvp-o1', category: 'DevOps', title: 'Deploy to Vercel & configure environment', description: 'Link your GitHub repo to a Vercel project. Add all `NEXT_PUBLIC_*` and server-side env vars in the Vercel dashboard. Enable preview deployments on every PR branch.', relatedTech: ['Vercel', 'GitHub'], status: 'TODO' },
+          { id: 'mvp-o2', category: 'DevOps', title: 'Add custom domain & HTTPS', description: 'Point your domain DNS to Vercel nameservers. Vercel automatically provisions an SSL certificate via Let\'s Encrypt. Verify www → non-www redirect works correctly.', relatedTech: ['Vercel'], status: 'TODO' },
+          // ── Testing ──
+          { id: 'mvp-t1', category: 'Testing', title: 'Setup Vitest for unit tests', description: 'Install Vitest and add a `vitest.config.ts`. Write tests for utility functions and form validation helpers. Add `npm test` to your CI step in GitHub Actions.', relatedTech: ['Vitest'], status: 'TODO' },
         ],
         nodes: [
-          { id: '1', position: { x: 250, y: 0 }, data: { label: 'User Client' } },
-          { id: '2', position: { x: 250, y: 150 }, data: { label: 'Next.js App' } },
-          { id: '3', position: { x: 250, y: 300 }, data: { label: 'Supabase (BaaS)' } }
+          { id: 'n1', position: { x: 250, y: 0   }, data: { label: 'User Browser' } },
+          { id: 'n2', position: { x: 250, y: 150  }, data: { label: 'Next.js App (Vercel)' } },
+          { id: 'n3', position: { x: 250, y: 300  }, data: { label: 'Supabase (Auth + DB)' } },
         ],
         edges: [
-          { id: 'e1-2', source: '1', target: '2' },
-          { id: 'e2-3', source: '2', target: '3' }
-        ]
+          { id: 'e1', source: 'n1', target: 'n2' },
+          { id: 'e2', source: 'n2', target: 'n3' },
+        ],
       },
+
+      // ─────────────────────────────────────────────────────────────
+      // Startup  — Custom backend, real team, production-ready
+      // ─────────────────────────────────────────────────────────────
       Startup: {
         techStack: [
-          { name: 'Next.js', simpleIconSlug: 'nextdotjs', rationale: 'React framework.', category: 'Frontend' },
-          { name: 'NestJS', simpleIconSlug: 'nestjs', rationale: 'Scalable backend API.', category: 'Backend' },
-          { name: 'PostgreSQL', simpleIconSlug: 'postgresql', rationale: 'Relational DB.', category: 'Database' },
-          { name: 'Redis', simpleIconSlug: 'redis', rationale: 'Session caching.', category: 'Database' },
-          { name: 'Docker', simpleIconSlug: 'docker', rationale: 'Containerization.', category: 'DevOps' }
+          // Frontend
+          { name: 'Next.js',      simpleIconSlug: 'nextdotjs',   rationale: 'SSR + API routes in one project. Perfect for B2B SaaS dashboards.',     category: 'Frontend' },
+          { name: 'Tailwind CSS', simpleIconSlug: 'tailwindcss', rationale: 'Utility-first styling — consistent design at scale with no CSS files.', category: 'Frontend' },
+          { name: 'Zustand',      simpleIconSlug: 'zustand',     rationale: 'Minimal global state management — simple, fast, no boilerplate.',       category: 'Frontend' },
+          // Backend
+          { name: 'NestJS',       simpleIconSlug: 'nestjs',      rationale: 'Modular, decorator-based Node.js framework. Scales with your team.',    category: 'Backend'  },
+          { name: 'Prisma',       simpleIconSlug: 'prisma',      rationale: 'Type-safe ORM with auto-generated migrations and client.',               category: 'Backend'  },
+          // Database
+          { name: 'PostgreSQL',   simpleIconSlug: 'postgresql',  rationale: 'Proven relational database — ACID compliant, great for SaaS.',          category: 'Database' },
+          { name: 'Redis',        simpleIconSlug: 'redis',       rationale: 'In-memory cache for sessions, rate limiting, and real-time queues.',    category: 'Database' },
+          // DevOps
+          { name: 'Docker',       simpleIconSlug: 'docker',      rationale: 'Containerize every service for identical dev/prod environments.',       category: 'DevOps'   },
+          { name: 'GitHub Actions', simpleIconSlug: 'githubactions', rationale: 'Free CI/CD for open-source — run tests & lint on every push.',     category: 'DevOps'   },
+          // Testing
+          { name: 'Jest',         simpleIconSlug: 'jest',        rationale: 'Standard Node.js testing framework, built into NestJS by default.',    category: 'Testing'  },
+          { name: 'Supertest',    simpleIconSlug: 'jest',        rationale: 'HTTP integration testing for your NestJS controllers and endpoints.',  category: 'Testing'  },
         ],
         checklist: [
-          { id: '1', category: 'Frontend', title: 'Bootstrap Next.js SSR Frontend', description: 'Initialize the frontend workspace with Next.js App Router. Implement secure session handling and API request interceptors using Axios to communicate with the NestJS backend.', relatedTech: ['Next.js', 'Tailwind CSS', 'Axios'], status: 'TODO' },
-          { id: '2', category: 'Backend', title: 'Initialize NestJS API Gateway', description: 'Setup NestJS core modules. Implement global exception filters, validation pipes (using class-validator), and configure Swagger UI for automatic API documentation generation.', relatedTech: ['NestJS', 'TypeScript', 'Swagger'], status: 'TODO' },
-          { id: '3', category: 'Backend', title: 'Design Prisma Database Schema', description: 'Write the schema.prisma file defining Users, Sessions, and core business models. Generate the Prisma Client and write initial seed scripts for local development data.', relatedTech: ['Prisma', 'PostgreSQL'], status: 'TODO' },
-          { id: '4', category: 'Database', title: 'Provision PostgreSQL & Redis', description: 'Deploy managed PostgreSQL and Redis instances. Configure connection pooling using PgBouncer to handle high concurrent connections, and set up Redis for session caching and rate limiting.', relatedTech: ['PostgreSQL', 'Redis', 'PgBouncer'], status: 'TODO' },
-          { id: '5', category: 'DevOps', title: 'Docker Compose Local Development Parity', description: 'Write a comprehensive docker-compose.yml to containerize the database, cache, and API. Ensure local developers can spin up the entire infrastructure stack with a single command.', relatedTech: ['Docker', 'Docker Compose'], status: 'TODO' }
+          // ── Frontend ──
+          { id: 'st-f1', category: 'Frontend', title: 'Bootstrap Next.js with Zustand state', description: 'Init the Next.js frontend. Configure Zustand stores for user session and global UI state. Set up Axios with request/response interceptors that attach the JWT Bearer token automatically.', relatedTech: ['Next.js', 'Zustand', 'Axios'], status: 'TODO' },
+          { id: 'st-f2', category: 'Frontend', title: 'Build dashboard layout & navigation', description: 'Create the authenticated app shell: a collapsible Sidebar, Topbar with user avatar dropdown, and a main content area. Protect all `/dashboard/*` routes using Next.js middleware.', relatedTech: ['Next.js', 'Tailwind CSS'], status: 'TODO' },
+          // ── Backend ──
+          { id: 'st-b1', category: 'Backend', title: 'Initialize NestJS with modules & Swagger', description: 'Generate the NestJS project. Create Auth, Users, and core feature modules. Configure global ValidationPipe with class-validator DTOs. Enable Swagger at `/api/docs` for team reference.', relatedTech: ['NestJS', 'Swagger', 'TypeScript'], status: 'TODO' },
+          { id: 'st-b2', category: 'Backend', title: 'Implement JWT authentication & guards', description: 'Create a JWT strategy using @nestjs/passport. Build AuthGuard and RolesGuard for protected routes. Implement refresh token rotation: store refresh tokens in Redis with a short TTL.', relatedTech: ['NestJS', 'JWT', 'Redis'], status: 'TODO' },
+          { id: 'st-b3', category: 'Backend', title: 'Design Prisma schema & seed data', description: 'Write `schema.prisma` with User, Session, and your core business models. Generate the Prisma client. Write a `seed.ts` file to populate local dev data. Run `prisma migrate dev` on each schema change.', relatedTech: ['Prisma', 'PostgreSQL'], status: 'TODO' },
+          // ── Database ──
+          { id: 'st-d1', category: 'Database', title: 'Provision PostgreSQL & Redis via Docker', description: 'Write a `docker-compose.yml` with PostgreSQL and Redis services. Use named volumes for data persistence. Add a health-check so the API waits for DB readiness before starting.', relatedTech: ['Docker', 'PostgreSQL', 'Redis'], status: 'TODO' },
+          { id: 'st-d2', category: 'Database', title: 'Configure PgBouncer connection pooling', description: 'Add PgBouncer as a sidecar container in your compose file. Set pool_mode to `transaction`. Point your Prisma DATABASE_URL at PgBouncer (port 6432) to prevent connection exhaustion under load.', relatedTech: ['PgBouncer', 'PostgreSQL'], status: 'TODO' },
+          // ── DevOps ──
+          { id: 'st-o1', category: 'DevOps', title: 'Create GitHub Actions CI pipeline', description: 'Create `.github/workflows/ci.yml` that runs on every push and PR. Steps: checkout → install → lint → test → build. Cache `node_modules` between runs to speed up the pipeline.', relatedTech: ['GitHub Actions', 'Docker'], status: 'TODO' },
+          { id: 'st-o2', category: 'DevOps', title: 'Configure production environment secrets', description: 'Use GitHub Secrets for DATABASE_URL, JWT_SECRET, REDIS_URL. Use a `.env.example` file (no real values) committed to repo. Never commit `.env` files — add them to `.gitignore`.', relatedTech: ['GitHub Actions'], status: 'TODO' },
+          // ── Testing ──
+          { id: 'st-t1', category: 'Testing', title: 'Write unit tests for services & DTOs', description: 'Use Jest with NestJS TestingModule. Mock Prisma client with `jest-mock-extended`. Target 70%+ coverage on all service methods. Run `npx jest --coverage` in the CI pipeline.', relatedTech: ['Jest', 'NestJS'], status: 'TODO' },
+          { id: 'st-t2', category: 'Testing', title: 'Write API integration tests with Supertest', description: 'Spin up an in-memory NestJS app in tests. Use Supertest to hit real HTTP endpoints. Test the full auth flow: register → login → access protected route → refresh token.', relatedTech: ['Supertest', 'Jest'], status: 'TODO' },
+          // ── Security ──
+          { id: 'st-s1', category: 'Security', title: 'Implement rate limiting & CORS policy', description: 'Add `@nestjs/throttler` with a limit of 20 req/min per IP. Configure CORS to only allow your frontend domain. Set security headers (Helmet.js) for XSS, clickjacking, and content-type sniffing protection.', relatedTech: ['NestJS', 'Helmet.js'], status: 'TODO' },
         ],
         nodes: [
-          { id: '1', position: { x: 250, y: 0 }, data: { label: 'User Client' } },
-          { id: '2', position: { x: 250, y: 150 }, data: { label: 'Frontend App' } },
-          { id: '3', position: { x: 250, y: 300 }, data: { label: 'NestJS API' } },
-          { id: '4', position: { x: 150, y: 450 }, data: { label: 'PostgreSQL DB' } },
-          { id: '5', position: { x: 350, y: 450 }, data: { label: 'Redis Cache' } }
+          { id: 'n1', position: { x: 250, y: 0   }, data: { label: 'User Browser' } },
+          { id: 'n2', position: { x: 250, y: 150  }, data: { label: 'Next.js Frontend' } },
+          { id: 'n3', position: { x: 250, y: 300  }, data: { label: 'NestJS API' } },
+          { id: 'n4', position: { x: 100, y: 450  }, data: { label: 'PostgreSQL' } },
+          { id: 'n5', position: { x: 400, y: 450  }, data: { label: 'Redis Cache' } },
         ],
         edges: [
-          { id: 'e1-2', source: '1', target: '2' },
-          { id: 'e2-3', source: '2', target: '3' },
-          { id: 'e3-4', source: '3', target: '4' },
-          { id: 'e3-5', source: '3', target: '5' }
-        ]
+          { id: 'e1', source: 'n1', target: 'n2' },
+          { id: 'e2', source: 'n2', target: 'n3' },
+          { id: 'e3', source: 'n3', target: 'n4' },
+          { id: 'e4', source: 'n3', target: 'n5' },
+        ],
       },
+
+      // ─────────────────────────────────────────────────────────────
+      // Professional  — Microservices, event-driven, cloud-native
+      // ─────────────────────────────────────────────────────────────
       Professional: {
         techStack: [
-          { name: 'React', simpleIconSlug: 'react', rationale: 'SPA Architecture.', category: 'Frontend' },
-          { name: 'NestJS', simpleIconSlug: 'nestjs', rationale: 'API Gateway.', category: 'Backend' },
-          { name: 'RabbitMQ', simpleIconSlug: 'rabbitmq', rationale: 'Message queues.', category: 'Backend' },
-          { name: 'PostgreSQL', simpleIconSlug: 'postgresql', rationale: 'Primary DB.', category: 'Database' },
-          { name: 'Terraform', simpleIconSlug: 'terraform', rationale: 'IaC.', category: 'DevOps' },
-          { name: 'GitHub Actions', simpleIconSlug: 'githubactions', rationale: 'CI/CD.', category: 'DevOps' }
+          // Frontend
+          { name: 'React',        simpleIconSlug: 'react',          rationale: 'SPA architecture with Vite for hot-reload and module federation.',        category: 'Frontend' },
+          { name: 'Vite',         simpleIconSlug: 'vite',           rationale: 'Blazing fast HMR and build tool — replaces Create React App.',            category: 'Frontend' },
+          { name: 'React Query',  simpleIconSlug: 'reactquery',     rationale: 'Server state management with caching, background sync, and prefetch.',   category: 'Frontend' },
+          // Backend
+          { name: 'NestJS',       simpleIconSlug: 'nestjs',         rationale: 'API Gateway + microservice orchestration with TCP/Redis transport.',      category: 'Backend'  },
+          { name: 'RabbitMQ',     simpleIconSlug: 'rabbitmq',       rationale: 'AMQP message broker for async event-driven communication.',               category: 'Backend'  },
+          { name: 'Prisma',       simpleIconSlug: 'prisma',         rationale: 'Type-safe ORM shared across multiple microservices.',                     category: 'Backend'  },
+          // Database
+          { name: 'PostgreSQL',   simpleIconSlug: 'postgresql',     rationale: 'Primary relational store with HA read-replicas on AWS RDS.',             category: 'Database' },
+          { name: 'Redis',        simpleIconSlug: 'redis',          rationale: 'Distributed cache, pub/sub for real-time, and session storage.',          category: 'Database' },
+          // DevOps
+          { name: 'Docker',       simpleIconSlug: 'docker',         rationale: 'Multi-stage Dockerfiles for minimal, secure production images.',          category: 'DevOps'   },
+          { name: 'Terraform',    simpleIconSlug: 'terraform',      rationale: 'IaC for reproducible AWS infrastructure — VPC, ECS, RDS, ALB.',          category: 'DevOps'   },
+          { name: 'GitHub Actions', simpleIconSlug: 'githubactions', rationale: 'Full CI/CD pipeline: test → build → push to ECR → deploy to ECS.',     category: 'DevOps'   },
+          // Testing
+          { name: 'Jest',         simpleIconSlug: 'jest',           rationale: 'Unit and integration testing for all microservices.',                    category: 'Testing'  },
+          { name: 'Playwright',   simpleIconSlug: 'playwright',     rationale: 'End-to-end browser testing — real user flows on Chrome, Firefox, Safari.', category: 'Testing' },
+          // Security
+          { name: 'AWS Secrets Manager', simpleIconSlug: 'amazonaws', rationale: 'Centralized secret rotation — no secrets in env vars or git.',        category: 'DevOps'   },
         ],
         checklist: [
-          { id: '1', category: 'Frontend', title: 'Architect React SPA with Module Federation', description: 'Configure Vite with React and implement Webpack Module Federation to allow independent deployment of distinct feature areas (micro-frontends) without breaking the shell app.', relatedTech: ['React', 'Vite', 'Webpack'], status: 'TODO' },
-          { id: '2', category: 'Backend', title: 'Initialize NestJS API Gateway & Auth', description: 'Setup NestJS gateway to intelligently route requests to internal microservices via TCP/Redis transport. Implement JWT authentication guards and Role-Based Access Control (RBAC).', relatedTech: ['NestJS', 'JWT'], status: 'TODO' },
-          { id: '3', category: 'Backend', title: 'Implement RabbitMQ Event Bus', description: 'Deploy RabbitMQ exchanges and queues. Implement an async, event-driven communication pattern between the API Gateway and Worker services to handle heavy background processing.', relatedTech: ['RabbitMQ', 'AMQP'], status: 'TODO' },
-          { id: '4', category: 'Database', title: 'Provision High Availability PostgreSQL Cluster', description: 'Deploy a multi-AZ PostgreSQL cluster. Configure asynchronous read-replicas for heavy reporting queries and implement automated daily snapshot backups.', relatedTech: ['PostgreSQL', 'AWS RDS'], status: 'TODO' },
-          { id: '5', category: 'DevOps', title: 'Dockerize Microservices with Multi-stage Builds', description: 'Create highly optimized, multi-stage Dockerfiles for all Node.js services. Ensure the final production images use distroless Alpine linux to minimize security vulnerabilities and image size.', relatedTech: ['Docker', 'Alpine'], status: 'TODO' },
-          { id: '6', category: 'DevOps', title: 'Provision AWS Infrastructure via Terraform', description: 'Write modular Terraform IaC scripts to provision a custom VPC, private/public subnets, NAT Gateways, and an ECS Fargate cluster with Application Load Balancers.', relatedTech: ['Terraform', 'AWS ECS'], status: 'TODO' }
+          // ── Frontend ──
+          { id: 'pr-f1', category: 'Frontend', title: 'Setup React SPA with Vite & Module Federation', description: 'Init with `npm create vite@latest`. Configure Webpack Module Federation plugin so distinct feature areas (Admin, Dashboard, Billing) can be deployed independently without breaking the shell.', relatedTech: ['React', 'Vite', 'Webpack'], status: 'TODO' },
+          { id: 'pr-f2', category: 'Frontend', title: 'Configure React Query for server state', description: 'Install TanStack Query. Wrap the app in `QueryClientProvider`. Create typed query hooks per resource (e.g. `useUserProfile`, `useOrders`). Configure stale time, retry logic, and error boundaries.', relatedTech: ['React Query', 'TypeScript'], status: 'TODO' },
+          // ── Backend ──
+          { id: 'pr-b1', category: 'Backend', title: 'Initialize NestJS API Gateway with RBAC', description: 'Setup the NestJS gateway. Implement JWT strategy + custom RolesGuard with decorators (`@Roles("admin")`). Route requests to internal microservices using NestJS microservice TCP transport.', relatedTech: ['NestJS', 'JWT', 'TypeScript'], status: 'TODO' },
+          { id: 'pr-b2', category: 'Backend', title: 'Implement RabbitMQ async event bus', description: 'Deploy RabbitMQ via Docker. Define topic exchanges and durable queues per domain (user-events, order-events). Implement publish-subscribe pattern in NestJS using `@nestjs/microservices`.', relatedTech: ['RabbitMQ', 'AMQP', 'NestJS'], status: 'TODO' },
+          { id: 'pr-b3', category: 'Backend', title: 'Build domain microservices (Auth, Orders, Notifications)', description: 'Create separate NestJS apps for Auth, Orders, and Notifications. Each service owns its DB schema in Prisma. Services communicate only via RabbitMQ events — no direct HTTP calls between services.', relatedTech: ['NestJS', 'Prisma', 'RabbitMQ'], status: 'TODO' },
+          // ── Database ──
+          { id: 'pr-d1', category: 'Database', title: 'Provision AWS RDS PostgreSQL with read replicas', description: 'Use Terraform to create a Multi-AZ RDS PostgreSQL instance. Add 1–2 read replicas for reporting queries. Point Prisma `DATABASE_URL` to the writer, `REPLICA_URL` to the reader endpoint.', relatedTech: ['PostgreSQL', 'Terraform', 'AWS RDS'], status: 'TODO' },
+          { id: 'pr-d2', category: 'Database', title: 'Configure Redis ElastiCache cluster', description: 'Use Terraform to deploy an AWS ElastiCache Redis cluster in a private subnet. Configure NestJS cache manager to use Redis for API response caching. Set TTLs per endpoint based on data freshness requirements.', relatedTech: ['Redis', 'AWS ElastiCache', 'Terraform'], status: 'TODO' },
+          // ── DevOps ──
+          { id: 'pr-o1', category: 'DevOps', title: 'Write multi-stage Dockerfiles for all services', description: 'Create a Dockerfile per service using multi-stage builds: `builder` stage installs deps + compiles TypeScript, `production` stage copies only the `dist/` folder to an Alpine base. Final image should be under 150MB.', relatedTech: ['Docker', 'Alpine'], status: 'TODO' },
+          { id: 'pr-o2', category: 'DevOps', title: 'Provision AWS ECS + ALB via Terraform', description: 'Write Terraform modules for: VPC with public/private subnets, NAT Gateway, ECR repositories, ECS Fargate cluster, Task Definitions per service, and an Application Load Balancer with path-based routing.', relatedTech: ['Terraform', 'AWS ECS', 'AWS ALB'], status: 'TODO' },
+          { id: 'pr-o3', category: 'DevOps', title: 'Build full CI/CD pipeline with GitHub Actions', description: 'Create a workflow that: runs lint + tests → builds Docker image → pushes to ECR → updates the ECS task definition → triggers a rolling deployment. Use GitHub OIDC to authenticate with AWS — no long-lived keys needed.', relatedTech: ['GitHub Actions', 'AWS ECR', 'AWS ECS'], status: 'TODO' },
+          // ── Testing ──
+          { id: 'pr-t1', category: 'Testing', title: 'Write unit & integration tests for all services', description: 'Use Jest TestingModule for each service. Mock RabbitMQ transport. Write integration tests that use a real in-memory SQLite database via Prisma. Target 80%+ branch coverage across all modules.', relatedTech: ['Jest', 'NestJS', 'Prisma'], status: 'TODO' },
+          { id: 'pr-t2', category: 'Testing', title: 'Implement Playwright E2E tests', description: 'Write end-to-end flows: user signup → login → complete core action → logout. Run in CI against a staging environment. Configure Playwright to generate HTML reports and screenshots on failure.', relatedTech: ['Playwright', 'GitHub Actions'], status: 'TODO' },
+          // ── Security ──
+          { id: 'pr-s1', category: 'Security', title: 'Centralize secrets with AWS Secrets Manager', description: 'Migrate all secrets (DB password, JWT secret, API keys) from env vars to AWS Secrets Manager. Use IAM roles for the ECS Task to read secrets at runtime — zero secrets in your codebase or CI environment.', relatedTech: ['AWS Secrets Manager', 'Terraform', 'IAM'], status: 'TODO' },
+          { id: 'pr-s2', category: 'Security', title: 'Configure WAF rules & DDoS protection', description: 'Attach AWS WAF to the Application Load Balancer. Enable managed rule groups for SQL injection, XSS, and known bad IPs. Enable AWS Shield Standard (free) for DDoS protection at the network layer.', relatedTech: ['AWS WAF', 'AWS Shield'], status: 'TODO' },
         ],
         nodes: [
-          { id: '1', position: { x: 250, y: 0 }, data: { label: 'Web Client' } },
-          { id: '2', position: { x: 250, y: 150 }, data: { label: 'API Gateway' } },
-          { id: '3', position: { x: 100, y: 300 }, data: { label: 'Auth Service' } },
-          { id: '4', position: { x: 400, y: 300 }, data: { label: 'Worker Service' } },
-          { id: '5', position: { x: 250, y: 450 }, data: { label: 'RabbitMQ' } },
-          { id: '6', position: { x: 250, y: 600 }, data: { label: 'PostgreSQL Cluster' } }
+          { id: 'n1', position: { x: 250, y: 0   }, data: { label: 'Web Client (React SPA)' } },
+          { id: 'n2', position: { x: 250, y: 150  }, data: { label: 'NestJS API Gateway' } },
+          { id: 'n3', position: { x: 80,  y: 300  }, data: { label: 'Auth Service' } },
+          { id: 'n4', position: { x: 420, y: 300  }, data: { label: 'Orders Service' } },
+          { id: 'n5', position: { x: 250, y: 450  }, data: { label: 'RabbitMQ Event Bus' } },
+          { id: 'n6', position: { x: 250, y: 600  }, data: { label: 'PostgreSQL (AWS RDS)' } },
+          { id: 'n7', position: { x: 500, y: 600  }, data: { label: 'Redis (ElastiCache)' } },
         ],
         edges: [
-          { id: 'e1-2', source: '1', target: '2' },
-          { id: 'e2-3', source: '2', target: '3' },
-          { id: 'e2-4', source: '2', target: '4' },
-          { id: 'e3-5', source: '3', target: '5' },
-          { id: 'e4-5', source: '4', target: '5' },
-          { id: 'e3-6', source: '3', target: '6' },
-          { id: 'e4-6', source: '4', target: '6' }
-        ]
+          { id: 'e1', source: 'n1', target: 'n2' },
+          { id: 'e2', source: 'n2', target: 'n3' },
+          { id: 'e3', source: 'n2', target: 'n4' },
+          { id: 'e4', source: 'n3', target: 'n5' },
+          { id: 'e5', source: 'n4', target: 'n5' },
+          { id: 'e6', source: 'n3', target: 'n6' },
+          { id: 'e7', source: 'n4', target: 'n6' },
+          { id: 'e8', source: 'n2', target: 'n7' },
+        ],
       },
+
+      // ─────────────────────────────────────────────────────────────
+      // Enterprise  — Global scale, compliance, full observability
+      // ─────────────────────────────────────────────────────────────
       Enterprise: {
         techStack: [
-          { name: 'React Microfrontends', simpleIconSlug: 'react', rationale: 'Decoupled UI.', category: 'Frontend' },
-          { name: 'Spring Boot', simpleIconSlug: 'springboot', rationale: 'Core services.', category: 'Backend' },
-          { name: 'Go', simpleIconSlug: 'go', rationale: 'High performance workers.', category: 'Backend' },
-          { name: 'Cassandra', simpleIconSlug: 'apachecassandra', rationale: 'Distributed NoSQL.', category: 'Database' },
-          { name: 'Apache Kafka', simpleIconSlug: 'apachekafka', rationale: 'Event streaming.', category: 'Database' },
-          { name: 'Kubernetes', simpleIconSlug: 'kubernetes', rationale: 'Container orchestration.', category: 'DevOps' },
-          { name: 'Datadog', simpleIconSlug: 'datadog', rationale: 'APM Observability.', category: 'DevOps' }
+          // Frontend
+          { name: 'React (MFE)',    simpleIconSlug: 'react',           rationale: 'Micro-frontend shell: teams deploy features independently.',               category: 'Frontend' },
+          { name: 'TypeScript',     simpleIconSlug: 'typescript',      rationale: 'Strict typing across all MFEs and shared contracts — reduces runtime bugs.', category: 'Frontend' },
+          // Backend
+          { name: 'Spring Boot',    simpleIconSlug: 'springboot',      rationale: 'Enterprise Java — battle-tested for financial and regulated industries.',    category: 'Backend'  },
+          { name: 'Go',             simpleIconSlug: 'go',              rationale: 'High-throughput analytics workers — minimal memory, maximum concurrency.',   category: 'Backend'  },
+          { name: 'gRPC',           simpleIconSlug: 'grpc',            rationale: 'Binary protocol for low-latency inter-service communication.',               category: 'Backend'  },
+          // Database
+          { name: 'PostgreSQL',     simpleIconSlug: 'postgresql',      rationale: 'Core transactional store — multi-region replication via Patroni.',           category: 'Database' },
+          { name: 'Apache Kafka',   simpleIconSlug: 'apachekafka',     rationale: 'Event streaming: replay any domain event, audit log, CQRS/ES pattern.',     category: 'Database' },
+          { name: 'Cassandra',      simpleIconSlug: 'apachecassandra', rationale: 'Multi-region NoSQL for petabyte-scale write-heavy time-series data.',        category: 'Database' },
+          { name: 'Elasticsearch',  simpleIconSlug: 'elasticsearch',   rationale: 'Full-text search and log aggregation across all services.',                 category: 'Database' },
+          // DevOps
+          { name: 'Kubernetes',     simpleIconSlug: 'kubernetes',      rationale: 'Container orchestration: auto-scaling, self-healing, zero-downtime deploys.', category: 'DevOps' },
+          { name: 'Terraform',      simpleIconSlug: 'terraform',       rationale: 'IaC for every AWS resource — EKS, RDS, Kafka MSK, VPCs, IAM.',              category: 'DevOps'  },
+          { name: 'ArgoCD',         simpleIconSlug: 'argo',            rationale: 'GitOps continuous delivery — cluster state always mirrors your Git repo.',    category: 'DevOps'  },
+          // Testing
+          { name: 'JUnit 5',        simpleIconSlug: 'junit5',          rationale: 'Standard Java testing framework for Spring Boot services.',                  category: 'Testing' },
+          { name: 'Playwright',     simpleIconSlug: 'playwright',      rationale: 'E2E browser testing across all MFE apps in a real browser.',                category: 'Testing' },
+          { name: 'k6',             simpleIconSlug: 'k6',              rationale: 'Load testing — define SLOs and verify your system meets them under stress.', category: 'Testing' },
+          // Security
+          { name: 'Istio',          simpleIconSlug: 'istio',           rationale: 'Service mesh — mTLS between all pods, traffic policies, and circuit breaking.', category: 'Security' },
+          { name: 'HashiCorp Vault', simpleIconSlug: 'vault',          rationale: 'Dynamic secrets — DB credentials auto-rotate, API keys expire automatically.', category: 'Security' },
+          // Monitoring
+          { name: 'Datadog',        simpleIconSlug: 'datadog',         rationale: 'APM, metrics, logs, and distributed traces in one unified platform.',        category: 'DevOps'  },
         ],
         checklist: [
-          { id: '1', category: 'Frontend', title: 'Setup Distributed Micro-frontend Architecture', description: 'Implement Webpack Module Federation across decoupled Next.js applications. Establish strict TypeScript contracts for cross-MFE communication and deploy a centralized NPM package for shared design system components.', relatedTech: ['Next.js', 'React', 'Webpack'], status: 'TODO' },
-          { id: '2', category: 'Backend', title: 'Initialize Spring Boot Core & Go Workers', description: 'Bootstrap the core domain services using Spring Boot 3 with JPA. Simultaneously initialize high-throughput, memory-efficient Go microservices to handle real-time analytics stream processing.', relatedTech: ['Spring Boot', 'Go', 'gRPC'], status: 'TODO' },
-          { id: '3', category: 'Database', title: 'Setup Apache Kafka Event Streaming Platform', description: 'Deploy a multi-broker Kafka cluster. Configure idempotent producers, partitioned topics for domain events, and implement the Outbox Pattern in Spring Boot to ensure guaranteed message delivery.', relatedTech: ['Apache Kafka', 'Zookeeper'], status: 'TODO' },
-          { id: '4', category: 'Database', title: 'Deploy Multi-Region Cassandra Ring', description: 'Provision a distributed Apache Cassandra database across multiple geographic regions to handle massive write-heavy telemetry data with zero downtime and eventual consistency.', relatedTech: ['Cassandra', 'NoSQL'], status: 'TODO' },
-          { id: '5', category: 'DevOps', title: 'Provision highly-available Kubernetes Cluster (EKS)', description: 'Write Helm charts for all services. Use Terraform to deploy an Amazon EKS cluster with autoscaling node groups, ingress controllers, and cluster autoscaler across 3 Availability Zones.', relatedTech: ['Kubernetes', 'Helm', 'Terraform'], status: 'TODO' },
-          { id: '6', category: 'Security', title: 'Implement mTLS and HashiCorp Vault', description: 'Setup Istio Service Mesh to enforce strict mTLS encryption between all pods. Deploy HashiCorp Vault to dynamically generate short-lived database credentials and rotate API keys automatically.', relatedTech: ['Istio', 'HashiCorp Vault'], status: 'TODO' },
-          { id: '7', category: 'DevOps', title: 'Implement Datadog APM & Distributed Tracing', description: 'Inject Datadog agents as DaemonSets in the Kubernetes cluster. Configure OpenTelemetry to propagate trace IDs across Spring Boot, Go, and Kafka to achieve 100% observability of requests.', relatedTech: ['Datadog', 'OpenTelemetry'], status: 'TODO' }
+          // ── Frontend ──
+          { id: 'en-f1', category: 'Frontend', title: 'Design & build the MFE shell application', description: 'Create the host shell app with Webpack Module Federation. It loads remote MFE modules at runtime from different deployment URLs. Define shared libraries (React, React Router, design system) to avoid duplication.', relatedTech: ['React', 'TypeScript', 'Webpack'], status: 'TODO' },
+          { id: 'en-f2', category: 'Frontend', title: 'Publish shared design system as private NPM package', description: 'Extract all UI components (Button, Table, Modal, Charts) into a monorepo package. Publish to GitHub Packages or npm. Each MFE imports from the package — one place to update branding across all apps.', relatedTech: ['TypeScript', 'React'], status: 'TODO' },
+          { id: 'en-f3', category: 'Frontend', title: 'Implement multi-tenant routing & white-labeling', description: 'Read tenant from subdomain or JWT claim. Load tenant-specific theme variables (colors, logo) from a config API. Ensure all pages render correctly for each tenant without code duplication.', relatedTech: ['React', 'TypeScript'], status: 'TODO' },
+          // ── Backend ──
+          { id: 'en-b1', category: 'Backend', title: 'Bootstrap Spring Boot core domain services', description: 'Create a multi-module Maven/Gradle project. Each bounded context (Users, Orders, Billing, Inventory) is a separate Spring Boot module. Use Spring Cloud Gateway as the API Gateway with JWT validation at the edge.', relatedTech: ['Spring Boot', 'Java', 'gRPC'], status: 'TODO' },
+          { id: 'en-b2', category: 'Backend', title: 'Build Go analytics worker services', description: 'Write Go services for high-frequency telemetry ingestion (millions of events/day). Use goroutines and channels for concurrent event processing. Expose gRPC interfaces consumed by the Spring services via Protobuf contracts.', relatedTech: ['Go', 'gRPC', 'Protobuf'], status: 'TODO' },
+          { id: 'en-b3', category: 'Backend', title: 'Implement CQRS pattern with Kafka Outbox', description: 'Separate read models (query-side) from write models (command-side). Use the Transactional Outbox Pattern: write events to an `outbox` table atomically with your DB transaction, then relay to Kafka via Debezium CDC.', relatedTech: ['Apache Kafka', 'Spring Boot', 'Debezium'], status: 'TODO' },
+          // ── Database ──
+          { id: 'en-d1', category: 'Database', title: 'Deploy multi-broker Kafka cluster (MSK)', description: 'Use Terraform to provision AWS MSK (Managed Kafka). Configure 3-broker cluster across 3 AZs. Define topic partitions and replication factors per domain. Enable TLS encryption and IAM authentication.', relatedTech: ['Apache Kafka', 'Terraform', 'AWS MSK'], status: 'TODO' },
+          { id: 'en-d2', category: 'Database', title: 'Deploy multi-region Cassandra ring', description: 'Provision Cassandra across 2+ AWS regions. Configure NetworkTopologyStrategy with RF=3 per region. Use LOCAL_QUORUM for writes to ensure low-latency regional consistency. Monitor with Cassandra Reaper for anti-entropy repairs.', relatedTech: ['Cassandra', 'AWS'], status: 'TODO' },
+          { id: 'en-d3', category: 'Database', title: 'Configure Elasticsearch for search & logs', description: 'Deploy an Elasticsearch cluster via Elastic Cloud or AWS OpenSearch. Index all domain events for audit logs and full-text search. Connect Logstash/Fluentd to ship application logs. Build Kibana dashboards for ops teams.', relatedTech: ['Elasticsearch', 'Kibana', 'Fluentd'], status: 'TODO' },
+          // ── DevOps ──
+          { id: 'en-o1', category: 'DevOps', title: 'Provision EKS cluster with Terraform', description: 'Write Terraform EKS module: managed node groups, cluster autoscaler, IRSA (IAM Roles for Service Accounts), VPC CNI plugin. Deploy across 3 AZs with a mix of On-Demand and Spot instances for cost optimization.', relatedTech: ['Kubernetes', 'Terraform', 'AWS EKS'], status: 'TODO' },
+          { id: 'en-o2', category: 'DevOps', title: 'Write Helm charts for all services', description: 'Create a Helm chart per service with configurable values for replicas, resource limits, env vars, and ingress. Use Helm `values-prod.yaml` and `values-staging.yaml` for environment-specific config. Store charts in a private OCI registry.', relatedTech: ['Kubernetes', 'Helm'], status: 'TODO' },
+          { id: 'en-o3', category: 'DevOps', title: 'Setup ArgoCD for GitOps delivery', description: 'Install ArgoCD in the cluster. Create an Application per service pointing to your Helm charts repo. Set auto-sync so any merge to `main` triggers a live cluster update. Enable Slack notifications for sync failures.', relatedTech: ['ArgoCD', 'Kubernetes', 'Helm'], status: 'TODO' },
+          { id: 'en-o4', category: 'DevOps', title: 'Implement Datadog APM & distributed tracing', description: 'Deploy the Datadog Agent as a DaemonSet. Instrument Spring Boot with dd-java-agent and Go with dd-trace-go. Configure OpenTelemetry context propagation so a single trace ID follows a request across all 5+ services end-to-end.', relatedTech: ['Datadog', 'OpenTelemetry'], status: 'TODO' },
+          // ── Testing ──
+          { id: 'en-t1', category: 'Testing', title: 'Write JUnit 5 tests with 85%+ coverage', description: 'Use Spring Boot Test slice annotations (@WebMvcTest, @DataJpaTest) for fast, focused tests. Use Testcontainers to spin up real PostgreSQL and Kafka in CI. Enforce 85% line coverage with JaCoCo in the Maven build.', relatedTech: ['JUnit 5', 'Testcontainers', 'Spring Boot'], status: 'TODO' },
+          { id: 'en-t2', category: 'Testing', title: 'Run k6 load tests against staging', description: 'Write k6 scripts that simulate your peak traffic (e.g. 10,000 concurrent users). Define SLOs: p99 latency < 200ms, error rate < 0.1%. Run automatically in a dedicated CI job before every production release.', relatedTech: ['k6', 'GitHub Actions'], status: 'TODO' },
+          // ── Security ──
+          { id: 'en-s1', category: 'Security', title: 'Install Istio service mesh with mTLS', description: 'Install Istio using Helm. Enable strict mTLS mode: all pod-to-pod communication is encrypted and mutually authenticated. Define PeerAuthentication policies for each namespace. Use Kiali dashboard to visualize the service graph.', relatedTech: ['Istio', 'Kubernetes'], status: 'TODO' },
+          { id: 'en-s2', category: 'Security', title: 'Deploy HashiCorp Vault for dynamic secrets', description: 'Install Vault on Kubernetes using the official Helm chart. Enable the database secrets engine for PostgreSQL: Vault generates a new username/password per service request with a 1-hour TTL. Configure the Vault Agent Injector to deliver secrets to pods automatically.', relatedTech: ['HashiCorp Vault', 'Kubernetes'], status: 'TODO' },
+          { id: 'en-s3', category: 'Security', title: 'Implement RBAC & audit logging (SOC2/GDPR)', description: 'Define fine-grained RBAC policies at the API and Kubernetes namespace level. Enable Kubernetes audit logging to CloudWatch. Configure the Elasticsearch audit index to store every data access event — required for SOC2 Type II and GDPR compliance.', relatedTech: ['Kubernetes', 'Elasticsearch', 'AWS CloudWatch'], status: 'TODO' },
         ],
         nodes: [
-          { id: '1', position: { x: 250, y: 0 }, data: { label: 'CDN / API Gateway' } },
-          { id: '2', position: { x: 100, y: 150 }, data: { label: 'MFE: Core' } },
-          { id: '3', position: { x: 400, y: 150 }, data: { label: 'MFE: Admin' } },
-          { id: '4', position: { x: 250, y: 300 }, data: { label: 'Kafka Event Bus' } },
-          { id: '5', position: { x: 100, y: 450 }, data: { label: 'Spring Service (Core)' } },
-          { id: '6', position: { x: 400, y: 450 }, data: { label: 'Go Worker (Analytics)' } },
-          { id: '7', position: { x: 100, y: 600 }, data: { label: 'PostgreSQL (Core DB)' } },
-          { id: '8', position: { x: 400, y: 600 }, data: { label: 'Cassandra (Big Data)' } }
+          { id: 'n1', position: { x: 250, y: 0   }, data: { label: 'CDN + WAF (CloudFront)' } },
+          { id: 'n2', position: { x: 80,  y: 150  }, data: { label: 'MFE: Core App' } },
+          { id: 'n3', position: { x: 420, y: 150  }, data: { label: 'MFE: Admin Portal' } },
+          { id: 'n4', position: { x: 250, y: 300  }, data: { label: 'Spring API Gateway' } },
+          { id: 'n5', position: { x: 80,  y: 450  }, data: { label: 'Spring Domain Services' } },
+          { id: 'n6', position: { x: 420, y: 450  }, data: { label: 'Go Analytics Workers' } },
+          { id: 'n7', position: { x: 250, y: 600  }, data: { label: 'Kafka Event Bus (MSK)' } },
+          { id: 'n8', position: { x: 80,  y: 750  }, data: { label: 'PostgreSQL (Multi-AZ)' } },
+          { id: 'n9', position: { x: 420, y: 750  }, data: { label: 'Cassandra (Multi-Region)' } },
         ],
         edges: [
-          { id: 'e1-2', source: '1', target: '2' },
-          { id: 'e1-3', source: '1', target: '3' },
-          { id: 'e2-5', source: '2', target: '5' },
-          { id: 'e3-5', source: '3', target: '5' },
-          { id: 'e5-4', source: '5', target: '4' },
-          { id: 'e4-6', source: '4', target: '6' },
-          { id: 'e5-7', source: '5', target: '7' },
-          { id: 'e6-8', source: '6', target: '8' }
-        ]
-      }
+          { id: 'e1',  source: 'n1', target: 'n2' },
+          { id: 'e2',  source: 'n1', target: 'n3' },
+          { id: 'e3',  source: 'n2', target: 'n4' },
+          { id: 'e4',  source: 'n3', target: 'n4' },
+          { id: 'e5',  source: 'n4', target: 'n5' },
+          { id: 'e6',  source: 'n4', target: 'n6' },
+          { id: 'e7',  source: 'n5', target: 'n7' },
+          { id: 'e8',  source: 'n6', target: 'n7' },
+          { id: 'e9',  source: 'n5', target: 'n8' },
+          { id: 'e10', source: 'n6', target: 'n9' },
+        ],
+      },
     };
-    return mockResponses[level] || mockResponses['MVP'];
+
+    return blueprints[level] || blueprints['MVP'];
   }
 
   async generateBlueprint(projectName: string, description: string, level: string, useMock: boolean = false) {
