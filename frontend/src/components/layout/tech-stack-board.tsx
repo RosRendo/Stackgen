@@ -66,17 +66,14 @@ export function TechStackBoard() {
                    entry?.category === 'Web Backend' || entry?.category === 'Programming Languages' ? 'Backend' :
                    entry?.category === 'Databases' || entry?.category === 'Messaging & Queues' ? 'Database' :
                    entry?.category === 'Testing' || entry?.category === 'Monitoring' || entry?.category === 'Security' ? 'Testing' :
-                   entry?.category === 'DevOps & CI/CD' || entry?.category === 'Containers & K8s' || entry?.category === 'Cloud & Hosting' ? 'DevOps' :
                    'Backend') as TechItem['category'],
         optional: false,
       };
       const techCategory = newTech.category || 'Backend';
       
-      // Ensure there is a node for this category
       let updatedNodes = [...nodes];
+      let updatedEdges = [...edges];
       
-      // We need a helper to check if a node exists for this category
-      // It's a bit tricky since node mapping is string based. We'll use a simple check:
       const categoryExists = nodes.some(n => {
         const l = (n.data?.label as string || '').toLowerCase();
         if (techCategory === 'Frontend') return l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react') || l.includes('mfe');
@@ -88,17 +85,45 @@ export function TechStackBoard() {
       });
 
       if (!categoryExists) {
-        // Find highest Y position to place the new node at the bottom
         const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.position.y)) : 0;
+        const newNodeId = `dyn-node-${techCategory.toLowerCase()}-${Date.now()}`;
+        
         updatedNodes.push({
-          id: `dyn-node-${techCategory.toLowerCase()}-${Date.now()}`,
+          id: newNodeId,
           type: 'tier',
           position: { x: 250, y: maxY + 150 },
           data: { label: `${techCategory} Tier` }
         });
+
+        // Smart Edge Connections
+        if (techCategory === 'Database') {
+          // Connect Backend -> Database
+          const backendNode = updatedNodes.find(n => {
+            const l = (n.data?.label as string || '').toLowerCase();
+            return l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service');
+          });
+          if (backendNode) {
+            updatedEdges.push({ id: `e-${backendNode.id}-${newNodeId}`, source: backendNode.id, target: newNodeId });
+          }
+        } else if (techCategory === 'Backend') {
+          // Connect Frontend -> Backend
+          const frontendNode = updatedNodes.find(n => {
+            const l = (n.data?.label as string || '').toLowerCase();
+            return l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui');
+          });
+          if (frontendNode) {
+            updatedEdges.push({ id: `e-${frontendNode.id}-${newNodeId}`, source: frontendNode.id, target: newNodeId });
+          }
+        } else if (techCategory === 'DevOps' || techCategory === 'Testing') {
+          // Connect from the topmost node (usually Frontend or API) -> DevOps/Testing
+          const topNode = updatedNodes.find(n => n.position.y === 0) || updatedNodes[0];
+          if (topNode) {
+            updatedEdges.push({ id: `e-${topNode.id}-${newNodeId}`, source: topNode.id, target: newNodeId });
+          }
+        }
       }
 
-      setGeneratedData({ techStack: [...techStack, newTech], checklist, nodes: updatedNodes, edges });
+      setGeneratedData({ techStack: [...techStack, newTech], checklist, nodes: updatedNodes, edges: updatedEdges });
     }
   };
 
