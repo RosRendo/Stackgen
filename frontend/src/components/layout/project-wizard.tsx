@@ -63,6 +63,7 @@ export function ProjectWizard() {
         if (res.status === 402) {
           const errData = await res.json().catch(() => null);
           alert(errData?.message || "Please upgrade your plan.");
+          router.push('/#pricing');
         } else if (res.status === 401) {
           alert("You must be logged in to generate.");
           router.push('/auth');

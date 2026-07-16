@@ -23,11 +23,11 @@ export function ArchitectureTierNode({ data, id }: { data: any; id: string }) {
   const category = useMemo(() => {
     const label = data.label || '';
     const l = label.toLowerCase();
-    if (l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react')) return 'Frontend';
-    if (l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express')) return 'Backend';
-    if (l.includes('database') || l.includes('db') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache')) return 'Database';
-    if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s')) return 'DevOps';
-    if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress')) return 'Testing';
+    if (l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react') || l.includes('mfe')) return 'Frontend';
+    if (l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express') || l.includes('worker') || l.includes('gateway') || l.includes('core')) return 'Backend';
+    if (l.includes('database') || l.includes('db') || l.includes('data') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache') || l.includes('kafka') || l.includes('cassandra') || l.includes('storage') || l.includes('bus')) return 'Database';
+    if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s') || l.includes('infra') || l.includes('cluster')) return 'DevOps';
+    if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress') || l.includes('security') || l.includes('auth')) return 'Testing';
     return null;
   }, [data.label]);
 

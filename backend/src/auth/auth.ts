@@ -17,8 +17,12 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
+      console.log(`\n========================================`);
+      console.log(`[Email Verification URL for ${user.email}]:`);
+      console.log(url);
+      console.log(`========================================\n`);
+      
       if (!process.env.RESEND_API_KEY) {
-        console.log(`[Email Verification URL for ${user.email}]: ${url}`);
         return;
       }
       try {

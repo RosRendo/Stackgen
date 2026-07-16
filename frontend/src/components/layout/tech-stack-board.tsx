@@ -62,11 +62,27 @@ export function TechStackBoard() {
         name,
         rationale: entry ? `${entry.subcategory} — ${entry.category}` : 'Selected from encyclopedia',
         simpleIconSlug: entry?.slug,
-        category: (entry?.category === 'Web Frontend' || entry?.category === 'Mobile' || entry?.category === 'Design & UI' ? 'Frontend' :
-                   entry?.category === 'Web Backend' || entry?.category === 'Programming Languages' ? 'Backend' :
-                   entry?.category === 'Databases' || entry?.category === 'Messaging & Queues' ? 'Database' :
-                   entry?.category === 'Testing' || entry?.category === 'Monitoring' || entry?.category === 'Security' ? 'Testing' :
-                   'Backend') as TechItem['category'],
+        category: ((): TechItem['category'] => {
+          const cat = entry?.category || '';
+          const sub = entry?.subcategory || '';
+          if (cat === 'Web Frontend' || cat === 'Mobile' || cat === 'Design & UI') return 'Frontend';
+          if (cat === 'Web Backend' || cat === 'Programming Languages') return 'Backend';
+          if (cat === 'Databases') return 'Database';
+          if (cat === 'Testing') return 'Testing';
+          if (cat === 'Security') return 'Security';
+          if (cat === 'DevOps & Infrastructure' || cat === 'Cloud Platforms') return 'DevOps';
+          if (cat === 'Messaging & Queues' || sub.toLowerCase().includes('queue') || sub.toLowerCase().includes('kafka') || sub.toLowerCase().includes('bullmq') || sub.toLowerCase().includes('rabbit')) return 'Queue';
+          if (cat === 'Monitoring' || sub.toLowerCase().includes('grafana') || sub.toLowerCase().includes('prometheus') || sub.toLowerCase().includes('datadog') || sub.toLowerCase().includes('opentelemetry') || sub.toLowerCase().includes('loki') || sub.toLowerCase().includes('observ')) return 'Observability';
+          if (sub.toLowerCase().includes('error') || sub.toLowerCase().includes('sentry') || sub.toLowerCase().includes('uptime') || sub.toLowerCase().includes('monitor')) return 'Monitoring';
+          if (sub.toLowerCase().includes('auth') || sub.toLowerCase().includes('oauth') || sub.toLowerCase().includes('sso') || sub.toLowerCase().includes('identity') || sub.toLowerCase().includes('jwt')) return 'Auth';
+          if (sub.toLowerCase().includes('payment') || sub.toLowerCase().includes('stripe') || sub.toLowerCase().includes('billing') || sub.toLowerCase().includes('paddle')) return 'Payment';
+          if (sub.toLowerCase().includes('email') || sub.toLowerCase().includes('resend') || sub.toLowerCase().includes('sendgrid') || sub.toLowerCase().includes('ses')) return 'Email';
+          if (sub.toLowerCase().includes('storage') || sub.toLowerCase().includes('s3') || sub.toLowerCase().includes('cdn') || sub.toLowerCase().includes('cloudinary') || sub.toLowerCase().includes('file')) return 'Storage';
+          if (sub.toLowerCase().includes('analytics') || sub.toLowerCase().includes('posthog') || sub.toLowerCase().includes('mixpanel') || sub.toLowerCase().includes('segment')) return 'Analytics';
+          if (sub.toLowerCase().includes('search') || sub.toLowerCase().includes('elasticsearch') || sub.toLowerCase().includes('meili') || sub.toLowerCase().includes('algolia')) return 'Search';
+          if (sub.toLowerCase().includes('ai') || sub.toLowerCase().includes('openai') || sub.toLowerCase().includes('langchain') || sub.toLowerCase().includes('vector') || sub.toLowerCase().includes('llm') || sub.toLowerCase().includes('rag')) return 'AI';
+          return 'Backend';
+        })(),
         optional: false,
       };
       const techCategory = newTech.category || 'Backend';

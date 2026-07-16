@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ReactFlow, Background, Controls, applyNodeChanges, type NodeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowRight, Save, Share2, Download, CheckCircle2, Circle, Clock, ChevronDown, Check, FolderGit2, Terminal, Code, Code2, Server, LayoutDashboard, Shield, Cloud, Loader2 } from 'lucide-react';
+import { ArrowRight, Save, Share2, Download, CheckCircle2, Circle, Clock, ChevronDown, Check, FolderGit2, Terminal, Code, Code2, Server, LayoutDashboard, Shield, Cloud, Loader2, Lock, CreditCard, Mail, HardDrive, Layers, BarChart2, Activity, Search, Bot, Eye, Zap, Database } from 'lucide-react';
 import { TechStackBoard } from './tech-stack-board';
 import { ArchitectureTierNode } from './architecture-node';
 import { motion } from 'framer-motion';
@@ -19,13 +19,30 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { MASTER_CHECKLIST } from '@/data/master-checklist-data';
 
-export function getCategoryFromLabel(label: string): 'Frontend' | 'Backend' | 'Database' | 'DevOps' | 'Testing' | null {
+export type AppCategory =
+  | 'Frontend' | 'Backend' | 'Database' | 'DevOps' | 'Testing'
+  | 'Auth' | 'Payment' | 'Email' | 'Storage' | 'Queue'
+  | 'Analytics' | 'Monitoring' | 'Security' | 'Search' | 'AI'
+  | 'Observability';
+
+export function getCategoryFromLabel(label: string): AppCategory | null {
   const l = label.toLowerCase();
-  if (l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react')) return 'Frontend';
-  if (l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express')) return 'Backend';
-  if (l.includes('database') || l.includes('db') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache')) return 'Database';
-  if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s')) return 'DevOps';
-  if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress')) return 'Testing';
+  if (l.includes('auth') || l.includes('login') || l.includes('oauth') || l.includes('sso') || l.includes('identity') || l.includes('jwt') || l.includes('session') || l.includes('mfa')) return 'Auth';
+  if (l.includes('payment') || l.includes('billing') || l.includes('stripe') || l.includes('paddle') || l.includes('subscription') || l.includes('checkout')) return 'Payment';
+  if (l.includes('email') || l.includes('resend') || l.includes('sendgrid') || l.includes('ses') || l.includes('smtp') || l.includes('mailgun')) return 'Email';
+  if (l.includes('storage') || l.includes('s3') || l.includes('upload') || l.includes('file') || l.includes('cdn') || l.includes('cloudinary') || l.includes('bucket')) return 'Storage';
+  if (l.includes('queue') || l.includes('bullmq') || l.includes('kafka') || l.includes('rabbitmq') || l.includes('worker') || l.includes('job') || l.includes('message') || l.includes('stream')) return 'Queue';
+  if (l.includes('analytics') || l.includes('posthog') || l.includes('mixpanel') || l.includes('funnel') || l.includes('track') || l.includes('segment') || l.includes('event')) return 'Analytics';
+  if (l.includes('monitoring') || l.includes('sentry') || l.includes('error') || l.includes('uptime') || l.includes('alert')) return 'Monitoring';
+  if (l.includes('observ') || l.includes('grafana') || l.includes('prometheus') || l.includes('datadog') || l.includes('otel') || l.includes('telemetry') || l.includes('tracing') || l.includes('loki') || l.includes('slo') || l.includes('metric')) return 'Observability';
+  if (l.includes('search') || l.includes('elasticsearch') || l.includes('meilisearch') || l.includes('typesense') || l.includes('algolia') || l.includes('full-text') || l.includes('fulltext') || l.includes('audit log')) return 'Search';
+  if (l.includes('ai') || l.includes('openai') || l.includes('langchain') || l.includes('vector') || l.includes('rag') || l.includes('llm') || l.includes('gpt') || l.includes('copilot') || l.includes('pinecone') || l.includes('classify') || l.includes('summariz')) return 'AI';
+  if (l.includes('security') || l.includes('vault') || l.includes('opa') || l.includes('waf') || l.includes('helmet') || l.includes('istio') || l.includes('mtls') || l.includes('secret') || l.includes('cors') || l.includes('rate limit') || l.includes('soc2') || l.includes('gdpr') || l.includes('zero trust') || l.includes('compliance')) return 'Security';
+  if (l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('next') || l.includes('react') || l.includes('vue') || l.includes('storybook') || l.includes('mfe') || l.includes('design system') || l.includes('module federation') || l.includes('turbo') || l.includes('wcag') || l.includes('accessib') || l.includes('white-label') || l.includes('white label') || l.includes('tenant')) return 'Frontend';
+  if (l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express') || l.includes('spring') || l.includes('grpc') || l.includes('microservice') || l.includes('gateway') || l.includes('domain') || l.includes('cqrs') || l.includes('ddd') || l.includes('bounded') || l.includes('outbox') || l.includes('swagger') || l.includes('versioning')) return 'Backend';
+  if (l.includes('database') || l.includes('db') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache') || l.includes('cassandra') || l.includes('replica') || l.includes('schema') || l.includes('migration') || l.includes('index') || l.includes('pgbouncer') || l.includes('rls') || l.includes('row level') || l.includes('seed') || l.includes('rds')) return 'Database';
+  if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('vercel') || l.includes('aws') || l.includes('gcp') || l.includes('ci/cd') || l.includes('k8s') || l.includes('kubernetes') || l.includes('nginx') || l.includes('terraform') || l.includes('helm') || l.includes('argocd') || l.includes('ecs') || l.includes('ekS') || l.includes('ssl') || l.includes('domain') || l.includes('github action') || l.includes('chaos') || l.includes('blue-green') || l.includes('canary') || l.includes('gitops')) return 'DevOps';
+  if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('vitest') || l.includes('playwright') || l.includes('cypress') || l.includes('supertest') || l.includes('junit') || l.includes('coverage') || l.includes('load test') || l.includes('k6') || l.includes('testcontainer') || l.includes('unit') || l.includes('integrat') || l.includes('e2e')) return 'Testing';
   return null;
 }
 
@@ -80,12 +97,47 @@ export function ProjectDashboard() {
   }, [checklist, dashboardFilterCategory]);
 
   const getCategoryIcon = (category: string) => {
+    const cls = 'w-4 h-4';
     switch (category) {
-      case 'Frontend': return <LayoutDashboard className="w-4 h-4 text-pink-500" />;
-      case 'Backend': return <Server className="w-4 h-4 text-green-500" />;
-      case 'Security': return <Shield className="w-4 h-4 text-yellow-500" />;
-      case 'DevOps': return <Cloud className="w-4 h-4 text-blue-500" />;
-      default: return <Code className="w-4 h-4 text-zinc-500" />;
+      case 'Frontend':    return <LayoutDashboard className={`${cls} text-pink-400`} />;
+      case 'Backend':     return <Server          className={`${cls} text-emerald-400`} />;
+      case 'Database':    return <Database        className={`${cls} text-sky-400`} />;
+      case 'Auth':        return <Lock            className={`${cls} text-violet-400`} />;
+      case 'Payment':     return <CreditCard      className={`${cls} text-yellow-400`} />;
+      case 'Email':       return <Mail            className={`${cls} text-orange-400`} />;
+      case 'Storage':     return <HardDrive       className={`${cls} text-cyan-400`} />;
+      case 'Queue':       return <Layers          className={`${cls} text-indigo-400`} />;
+      case 'Analytics':   return <BarChart2       className={`${cls} text-lime-400`} />;
+      case 'Monitoring':  return <Activity        className={`${cls} text-red-400`} />;
+      case 'Observability': return <Eye           className={`${cls} text-teal-400`} />;
+      case 'Search':      return <Search          className={`${cls} text-fuchsia-400`} />;
+      case 'AI':          return <Bot             className={`${cls} text-blue-400`} />;
+      case 'Security':    return <Shield          className={`${cls} text-amber-400`} />;
+      case 'DevOps':      return <Cloud           className={`${cls} text-blue-500`} />;
+      case 'Testing':     return <Zap             className={`${cls} text-green-400`} />;
+      default:            return <Code            className={`${cls} text-zinc-500`} />;
+    }
+  };
+
+  const getCategoryColor = (category: string): string => {
+    switch (category) {
+      case 'Frontend':    return 'border-pink-500/30 bg-pink-500/10 text-pink-300';
+      case 'Backend':     return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+      case 'Database':    return 'border-sky-500/30 bg-sky-500/10 text-sky-300';
+      case 'Auth':        return 'border-violet-500/30 bg-violet-500/10 text-violet-300';
+      case 'Payment':     return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300';
+      case 'Email':       return 'border-orange-500/30 bg-orange-500/10 text-orange-300';
+      case 'Storage':     return 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300';
+      case 'Queue':       return 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300';
+      case 'Analytics':   return 'border-lime-500/30 bg-lime-500/10 text-lime-300';
+      case 'Monitoring':  return 'border-red-500/30 bg-red-500/10 text-red-300';
+      case 'Observability': return 'border-teal-500/30 bg-teal-500/10 text-teal-300';
+      case 'Search':      return 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300';
+      case 'AI':          return 'border-blue-500/30 bg-blue-500/10 text-blue-300';
+      case 'Security':    return 'border-amber-500/30 bg-amber-500/10 text-amber-300';
+      case 'DevOps':      return 'border-blue-600/30 bg-blue-600/10 text-blue-400';
+      case 'Testing':     return 'border-green-500/30 bg-green-500/10 text-green-300';
+      default:            return 'border-zinc-500/30 bg-zinc-500/10 text-zinc-300';
     }
   };
 
@@ -362,12 +414,22 @@ export function ProjectDashboard() {
                     }, {} as Record<string, ProjectTask[]>)
                   ).map(([cat, tasks], groupIdx) => {
                     const catColors: Record<string, { border: string; label: string; dot: string; step: string }> = {
-                      Frontend: { border: 'border-pink-500/30', label: 'text-pink-400', dot: 'bg-pink-500', step: 'bg-pink-500/10 text-pink-300 border-pink-500/20' },
-                      Backend:  { border: 'border-green-500/30', label: 'text-green-400', dot: 'bg-green-500', step: 'bg-green-500/10 text-green-300 border-green-500/20' },
-                      Database: { border: 'border-blue-500/30',  label: 'text-blue-400',  dot: 'bg-blue-500',  step: 'bg-blue-500/10 text-blue-300 border-blue-500/20' },
-                      DevOps:   { border: 'border-yellow-500/30',label: 'text-yellow-400',dot: 'bg-yellow-500',step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20' },
-                      Security: { border: 'border-orange-500/30',label: 'text-orange-400',dot: 'bg-orange-500',step: 'bg-orange-500/10 text-orange-300 border-orange-500/20' },
-                      Testing:  { border: 'border-purple-500/30',label: 'text-purple-400',dot: 'bg-purple-500',step: 'bg-purple-500/10 text-purple-300 border-purple-500/20' },
+                      Frontend:     { border: 'border-pink-500/30',    label: 'text-pink-400',    dot: 'bg-pink-500',    step: 'bg-pink-500/10 text-pink-300 border-pink-500/20' },
+                      Backend:      { border: 'border-emerald-500/30', label: 'text-emerald-400', dot: 'bg-emerald-500', step: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
+                      Database:     { border: 'border-sky-500/30',     label: 'text-sky-400',     dot: 'bg-sky-500',     step: 'bg-sky-500/10 text-sky-300 border-sky-500/20' },
+                      Auth:         { border: 'border-violet-500/30',  label: 'text-violet-400',  dot: 'bg-violet-500',  step: 'bg-violet-500/10 text-violet-300 border-violet-500/20' },
+                      Payment:      { border: 'border-yellow-500/30',  label: 'text-yellow-400',  dot: 'bg-yellow-500',  step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20' },
+                      Email:        { border: 'border-orange-500/30',  label: 'text-orange-400',  dot: 'bg-orange-500',  step: 'bg-orange-500/10 text-orange-300 border-orange-500/20' },
+                      Storage:      { border: 'border-cyan-500/30',    label: 'text-cyan-400',    dot: 'bg-cyan-500',    step: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20' },
+                      Queue:        { border: 'border-indigo-500/30',  label: 'text-indigo-400',  dot: 'bg-indigo-500',  step: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' },
+                      Analytics:    { border: 'border-lime-500/30',    label: 'text-lime-400',    dot: 'bg-lime-500',    step: 'bg-lime-500/10 text-lime-300 border-lime-500/20' },
+                      Monitoring:   { border: 'border-red-500/30',     label: 'text-red-400',     dot: 'bg-red-500',     step: 'bg-red-500/10 text-red-300 border-red-500/20' },
+                      Observability:{ border: 'border-teal-500/30',    label: 'text-teal-400',    dot: 'bg-teal-500',    step: 'bg-teal-500/10 text-teal-300 border-teal-500/20' },
+                      Search:       { border: 'border-fuchsia-500/30', label: 'text-fuchsia-400', dot: 'bg-fuchsia-500', step: 'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/20' },
+                      AI:           { border: 'border-blue-400/30',    label: 'text-blue-400',    dot: 'bg-blue-400',    step: 'bg-blue-400/10 text-blue-300 border-blue-400/20' },
+                      Security:     { border: 'border-amber-500/30',   label: 'text-amber-400',   dot: 'bg-amber-500',   step: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
+                      DevOps:       { border: 'border-blue-600/30',    label: 'text-blue-500',    dot: 'bg-blue-600',    step: 'bg-blue-600/10 text-blue-400 border-blue-600/20' },
+                      Testing:      { border: 'border-green-500/30',   label: 'text-green-400',   dot: 'bg-green-500',   step: 'bg-green-500/10 text-green-300 border-green-500/20' },
                     };
                     const colors = catColors[cat] || { border: 'border-zinc-700', label: 'text-zinc-400', dot: 'bg-zinc-500', step: 'bg-zinc-800 text-zinc-300 border-zinc-700' };
                     const doneCount = tasks.filter(t => t.status === 'DONE').length;
@@ -567,12 +629,22 @@ export function ProjectDashboard() {
             const { task, stepNum, cat, allTasks } = selectedTaskDetail;
             const isDone = task.status === 'DONE';
             const catColors: Record<string, { border: string; label: string; accent: string; step: string; dot: string }> = {
-              Frontend: { border: 'border-pink-500/30',  label: 'text-pink-400',  accent: 'bg-pink-500/10',  step: 'bg-pink-500/10 text-pink-300 border-pink-500/20',  dot: 'bg-pink-500' },
-              Backend:  { border: 'border-green-500/30', label: 'text-green-400', accent: 'bg-green-500/10', step: 'bg-green-500/10 text-green-300 border-green-500/20', dot: 'bg-green-500' },
-              Database: { border: 'border-blue-500/30',  label: 'text-blue-400',  accent: 'bg-blue-500/10',  step: 'bg-blue-500/10 text-blue-300 border-blue-500/20',  dot: 'bg-blue-500' },
-              DevOps:   { border: 'border-yellow-500/30',label: 'text-yellow-400',accent: 'bg-yellow-500/10',step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',dot: 'bg-yellow-500' },
-              Security: { border: 'border-orange-500/30',label: 'text-orange-400',accent: 'bg-orange-500/10',step: 'bg-orange-500/10 text-orange-300 border-orange-500/20',dot: 'bg-orange-500' },
-              Testing:  { border: 'border-purple-500/30',label: 'text-purple-400',accent: 'bg-purple-500/10',step: 'bg-purple-500/10 text-purple-300 border-purple-500/20',dot: 'bg-purple-500' },
+              Frontend:     { border: 'border-pink-500/30',    label: 'text-pink-400',    accent: 'bg-pink-500/10',    step: 'bg-pink-500/10 text-pink-300 border-pink-500/20',    dot: 'bg-pink-500' },
+              Backend:      { border: 'border-emerald-500/30', label: 'text-emerald-400', accent: 'bg-emerald-500/10', step: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20', dot: 'bg-emerald-500' },
+              Database:     { border: 'border-sky-500/30',     label: 'text-sky-400',     accent: 'bg-sky-500/10',     step: 'bg-sky-500/10 text-sky-300 border-sky-500/20',     dot: 'bg-sky-500' },
+              Auth:         { border: 'border-violet-500/30',  label: 'text-violet-400',  accent: 'bg-violet-500/10',  step: 'bg-violet-500/10 text-violet-300 border-violet-500/20',  dot: 'bg-violet-500' },
+              Payment:      { border: 'border-yellow-500/30',  label: 'text-yellow-400',  accent: 'bg-yellow-500/10',  step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',  dot: 'bg-yellow-500' },
+              Email:        { border: 'border-orange-500/30',  label: 'text-orange-400',  accent: 'bg-orange-500/10',  step: 'bg-orange-500/10 text-orange-300 border-orange-500/20',  dot: 'bg-orange-500' },
+              Storage:      { border: 'border-cyan-500/30',    label: 'text-cyan-400',    accent: 'bg-cyan-500/10',    step: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',    dot: 'bg-cyan-500' },
+              Queue:        { border: 'border-indigo-500/30',  label: 'text-indigo-400',  accent: 'bg-indigo-500/10',  step: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',  dot: 'bg-indigo-500' },
+              Analytics:    { border: 'border-lime-500/30',    label: 'text-lime-400',    accent: 'bg-lime-500/10',    step: 'bg-lime-500/10 text-lime-300 border-lime-500/20',    dot: 'bg-lime-500' },
+              Monitoring:   { border: 'border-red-500/30',     label: 'text-red-400',     accent: 'bg-red-500/10',     step: 'bg-red-500/10 text-red-300 border-red-500/20',     dot: 'bg-red-500' },
+              Observability:{ border: 'border-teal-500/30',    label: 'text-teal-400',    accent: 'bg-teal-500/10',    step: 'bg-teal-500/10 text-teal-300 border-teal-500/20',    dot: 'bg-teal-500' },
+              Search:       { border: 'border-fuchsia-500/30', label: 'text-fuchsia-400', accent: 'bg-fuchsia-500/10', step: 'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/20', dot: 'bg-fuchsia-500' },
+              AI:           { border: 'border-blue-400/30',    label: 'text-blue-400',    accent: 'bg-blue-400/10',    step: 'bg-blue-400/10 text-blue-300 border-blue-400/20',    dot: 'bg-blue-400' },
+              Security:     { border: 'border-amber-500/30',   label: 'text-amber-400',   accent: 'bg-amber-500/10',   step: 'bg-amber-500/10 text-amber-300 border-amber-500/20',   dot: 'bg-amber-500' },
+              DevOps:       { border: 'border-blue-600/30',    label: 'text-blue-500',    accent: 'bg-blue-600/10',    step: 'bg-blue-600/10 text-blue-400 border-blue-600/20',    dot: 'bg-blue-600' },
+              Testing:      { border: 'border-green-500/30',   label: 'text-green-400',   accent: 'bg-green-500/10',   step: 'bg-green-500/10 text-green-300 border-green-500/20',   dot: 'bg-green-500' },
             };
             const colors = catColors[cat] || { border: 'border-zinc-700', label: 'text-zinc-400', accent: 'bg-zinc-800', step: 'bg-zinc-800 text-zinc-300 border-zinc-700', dot: 'bg-zinc-500' };
             const prevTask = allTasks[stepNum - 2] || null;
