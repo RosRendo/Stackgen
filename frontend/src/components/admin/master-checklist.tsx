@@ -247,7 +247,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
         
         {/* --- Sidebar Navigation --- */}
         <div className="w-full md:w-64 border-r border-zinc-800/60 bg-zinc-900/30 flex flex-col shrink-0">
-          <ScrollArea className="flex-1 px-3 py-4">
+          <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-zinc-700">
             <div className="space-y-1">
               
               {/* AI Tasks Nav Item */}
@@ -316,7 +316,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
               })}
 
             </div>
-          </ScrollArea>
+          </div>
         </div>
 
         {/* --- Main Content Area --- */}
@@ -386,7 +386,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
           </div>
 
           {/* Checklist Items */}
-          <ScrollArea className="flex-1 p-6">
+          <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-zinc-700">
             
             {activeTab === 'ai-tasks' && (
               <div className="space-y-6 max-w-4xl pb-12">
@@ -509,8 +509,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                 </div>
               );
             })}
-
-          </ScrollArea>
+          </div>
         </div>
       </CardContent>
     </Card>
