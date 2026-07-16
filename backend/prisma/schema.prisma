@@ -21,7 +21,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
-  polarCustomerId    String?
+  paddleCustomerId   String?
   subscriptionTier   String?   @default("Free")
   subscriptionStatus String?   @default("inactive")
   tokenBalance       Int       @default(10000)
