@@ -315,19 +315,20 @@ export function ProjectDashboard() {
 
           {/* Checklist */}
           <Card className="bg-zinc-950/50 border-zinc-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>
-                <CardTitle className="text-lg">Project Actions (AI Tasks)</CardTitle>
+                <CardTitle className="text-lg">🗺️ Your Build Roadmap</CardTitle>
+                <p className="text-xs text-zinc-500 mt-1">Step-by-step tasks to build your project, grouped by area. Complete them in order for the smoothest experience.</p>
                 {dashboardFilterCategory && (
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-2">
                     <span className="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                      Filtered: {dashboardFilterCategory}
+                      Showing: {dashboardFilterCategory} only
                     </span>
                     <button 
                       onClick={() => setDashboardFilterCategory(null)}
                       className="text-[10px] text-zinc-500 hover:text-red-400 underline"
                     >
-                      Clear
+                      Show all
                     </button>
                   </div>
                 )}
@@ -336,15 +337,15 @@ export function ProjectDashboard() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="h-8 border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white"
-                  onClick={() => router.push(`/projects/${projectId}/checklist${dashboardFilterCategory ? `?category=${dashboardFilterCategory.toLowerCase()}` : ''}`)}
+                  className="h-8 border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white shrink-0"
+                  onClick={() => router.push(`/projects/${projectId}/checklist`)}
                 >
-                  Open Master Checklist
+                  Full Checklist →
                 </Button>
               )}
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {filteredChecklist.length === 0 ? (
                   <div className="text-zinc-500 text-sm italic py-8 text-center bg-zinc-900/10 rounded border border-dashed border-zinc-800">
                     No tasks found for {dashboardFilterCategory}.
@@ -357,59 +358,117 @@ export function ProjectDashboard() {
                       acc[cat].push(task);
                       return acc;
                     }, {} as Record<string, ProjectTask[]>)
-                  ).map(([cat, tasks]) => (
-                    <div key={cat} className="space-y-3">
-                      <button 
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        onClick={() => setDashboardFilterCategory(cat as any)}
-                        className="flex items-center gap-2 px-2 py-1 -ml-1 rounded-lg hover:bg-zinc-800/50 transition-colors text-left"
-                      >
-                        {getCategoryIcon(cat)}
-                        <h4 className="font-semibold text-zinc-300 text-sm uppercase tracking-wider">{cat}</h4>
-                      </button>
-                      <div className="pl-4 border-l-2 border-zinc-800/60 space-y-3 ml-2">
-                        {tasks.map(task => (
-                          <div key={task.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors gap-4">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <Checkbox 
-                                checked={task.status === 'DONE'} 
-                                onCheckedChange={() => toggleTaskStatus(task.id)}
-                                className="mt-1 border-zinc-700 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 shrink-0"
-                              />
-                              <div className="flex flex-col gap-1 w-full">
-                                <div className={`font-semibold text-sm ${task.status === 'DONE' ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
-                                  {task.title}
-                                </div>
-                                {task.description && (
-                                  <p className={`text-xs leading-relaxed ${task.status === 'DONE' ? 'text-zinc-600 line-through' : 'text-zinc-400'}`}>
-                                    {task.description}
-                                  </p>
-                                )}
-                                {task.relatedTech && task.relatedTech.length > 0 && (
-                                  <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                                    {task.relatedTech.map((tech, i) => (
-                                      <span key={i} className={`text-[9px] font-medium px-1.5 py-0.5 rounded border whitespace-nowrap ${task.status === 'DONE' ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800' : 'bg-zinc-800 text-zinc-300 border-zinc-700'}`}>
-                                        {tech}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <Button 
-                              variant="secondary" 
-                              size="sm" 
-                              className="h-8 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 shrink-0"
-                              onClick={() => handleGeneratePrompt(task)}
-                            >
-                              <Terminal className="w-3 h-3 mr-1" />
-                              Generate Prompt
-                            </Button>
+                  ).map(([cat, tasks], groupIdx) => {
+                    const catColors: Record<string, { border: string; label: string; dot: string; step: string }> = {
+                      Frontend: { border: 'border-pink-500/30', label: 'text-pink-400', dot: 'bg-pink-500', step: 'bg-pink-500/10 text-pink-300 border-pink-500/20' },
+                      Backend:  { border: 'border-green-500/30', label: 'text-green-400', dot: 'bg-green-500', step: 'bg-green-500/10 text-green-300 border-green-500/20' },
+                      Database: { border: 'border-blue-500/30',  label: 'text-blue-400',  dot: 'bg-blue-500',  step: 'bg-blue-500/10 text-blue-300 border-blue-500/20' },
+                      DevOps:   { border: 'border-yellow-500/30',label: 'text-yellow-400',dot: 'bg-yellow-500',step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20' },
+                      Security: { border: 'border-orange-500/30',label: 'text-orange-400',dot: 'bg-orange-500',step: 'bg-orange-500/10 text-orange-300 border-orange-500/20' },
+                      Testing:  { border: 'border-purple-500/30',label: 'text-purple-400',dot: 'bg-purple-500',step: 'bg-purple-500/10 text-purple-300 border-purple-500/20' },
+                    };
+                    const colors = catColors[cat] || { border: 'border-zinc-700', label: 'text-zinc-400', dot: 'bg-zinc-500', step: 'bg-zinc-800 text-zinc-300 border-zinc-700' };
+                    const doneCount = tasks.filter(t => t.status === 'DONE').length;
+                    return (
+                      <div key={cat}>
+                        {/* Category Header */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className={`w-2.5 h-2.5 rounded-full ${colors.dot} shrink-0`} />
+                          <div className="flex items-center gap-3 flex-1">
+                            <h4 className={`font-bold text-sm uppercase tracking-widest ${colors.label}`}>{cat}</h4>
+                            <span className="text-[10px] text-zinc-500">{doneCount}/{tasks.length} done</span>
                           </div>
-                        ))}
+                          <div className="flex-1 h-px bg-zinc-800/60" />
+                        </div>
+
+                        {/* Task Cards */}
+                        <div className={`border-l-2 ${colors.border} ml-1 pl-5 space-y-4`}>
+                          {tasks.map((task, taskIdx) => {
+                            const stepNum = taskIdx + 1;
+                            const isDone = task.status === 'DONE';
+                            return (
+                              <div 
+                                key={task.id} 
+                                className={`relative rounded-xl border transition-all duration-200 ${
+                                  isDone 
+                                    ? 'border-zinc-800/40 bg-zinc-900/10 opacity-60' 
+                                    : `border-zinc-800/60 bg-zinc-900/40 hover:bg-zinc-900/70 hover:${colors.border}`
+                                }`}
+                              >
+                                {/* Step Number Badge */}
+                                <div className={`absolute -left-8 top-4 w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-bold ${
+                                  isDone ? 'bg-green-500/20 border-green-500/40 text-green-400' : `${colors.step} border`
+                                }`}>
+                                  {isDone ? '✓' : stepNum}
+                                </div>
+
+                                <div className="p-4">
+                                  {/* Task header row */}
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                                      <Checkbox 
+                                        checked={isDone} 
+                                        onCheckedChange={() => toggleTaskStatus(task.id)}
+                                        className={`mt-0.5 border-zinc-700 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 shrink-0`}
+                                      />
+                                      <div>
+                                        <div className={`font-semibold text-sm leading-snug ${isDone ? 'line-through text-zinc-500' : 'text-zinc-100'}`}>
+                                          {task.title}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {/* Status badge */}
+                                    {isDone ? (
+                                      <span className="text-[10px] font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full shrink-0">Done ✓</span>
+                                    ) : stepNum === 1 && doneCount === 0 ? (
+                                      <span className={`text-[10px] font-semibold border px-2 py-0.5 rounded-full shrink-0 ${colors.step}`}>Start here</span>
+                                    ) : doneCount === taskIdx ? (
+                                      <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full shrink-0">Up next</span>
+                                    ) : null}
+                                  </div>
+
+                                  {/* Description */}
+                                  {task.description && (
+                                    <p className={`text-xs leading-relaxed mt-2 ml-7 ${isDone ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                                      {task.description}
+                                    </p>
+                                  )}
+
+                                  {/* Footer: tech + CTA */}
+                                  <div className="flex items-center justify-between gap-4 mt-3 ml-7">
+                                    {task.relatedTech && task.relatedTech.length > 0 && (
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[9px] text-zinc-600 mr-0.5">Uses:</span>
+                                        {task.relatedTech.map((tech, i) => (
+                                          <span key={i} className={`text-[9px] font-medium px-1.5 py-0.5 rounded border whitespace-nowrap ${
+                                            isDone ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800' : 'bg-zinc-800/80 text-zinc-300 border-zinc-700'
+                                          }`}>
+                                            {tech}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                    <button
+                                      disabled={isDone}
+                                      onClick={() => handleGeneratePrompt(task)}
+                                      className={`flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border transition-all shrink-0 ${
+                                        isDone 
+                                          ? 'opacity-30 cursor-not-allowed border-zinc-800 text-zinc-600' 
+                                          : `${colors.step} border hover:opacity-80`
+                                      }`}
+                                    >
+                                      <Terminal className="w-3 h-3" />
+                                      Get AI Instructions
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </CardContent>
@@ -511,30 +570,51 @@ export function ProjectDashboard() {
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-2xl">
           <DialogHeader>
-            <DialogTitle>AI Coding Prompt</DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              Copy this perfectly crafted prompt into Cursor, Copilot, or ChatGPT to implement: <strong className="text-zinc-200">{selectedTask?.title}</strong>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Terminal className="w-5 h-5 text-blue-400" />
+              AI Coding Instructions
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400 mt-1 leading-relaxed">
+              Below is a ready-to-use prompt you can paste into <strong className="text-zinc-200">Cursor, GitHub Copilot, Claude, or ChatGPT</strong>. The AI will read your full project structure and guide you through implementing this step.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Task context reminder */}
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 mt-1">
+            <div className="w-1.5 h-full min-h-[40px] rounded-full bg-blue-500/50 shrink-0" />
+            <div>
+              <div className="text-xs text-zinc-500 mb-0.5 uppercase tracking-wider">Task to implement</div>
+              <div className="text-sm font-semibold text-zinc-200">{selectedTask?.title}</div>
+              {selectedTask?.description && (
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{selectedTask?.description}</p>
+              )}
+            </div>
+          </div>
           
-          <div className="mt-4">
+          <div className="mt-2">
             {isGeneratingPrompt ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-4">
                 <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                <p className="text-zinc-400 text-sm">Crafting the perfect prompt...</p>
+                <p className="text-zinc-400 text-sm">Reading your project architecture and crafting instructions...</p>
+                <p className="text-zinc-600 text-xs">This includes your full tech stack, all planned steps, and the specific context for this task.</p>
               </div>
             ) : (
               <div className="relative">
-                <pre className="p-4 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 whitespace-pre-wrap font-mono h-64 overflow-y-auto">
+                <pre className="p-4 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 whitespace-pre-wrap font-mono h-72 overflow-y-auto">
                   {generatedPrompt}
                 </pre>
                 <Button 
-                  className="absolute top-2 right-2 h-8 bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                  className="absolute top-2 right-2 h-8 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs"
                   onClick={() => navigator.clipboard.writeText(generatedPrompt)}
                 >
-                  Copy Prompt
+                  Copy ✓
                 </Button>
               </div>
+            )}
+            {!isGeneratingPrompt && generatedPrompt && (
+              <p className="text-xs text-zinc-600 mt-2 text-center">
+                💡 Paste this into your AI coding assistant and it will implement the task step by step.
+              </p>
             )}
           </div>
         </DialogContent>
