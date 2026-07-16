@@ -34,7 +34,19 @@ export class ProjectsService {
               category: task.category,
               title: task.title,
               status: task.status,
-              priority: 'MEDIUM'
+              priority: 'MEDIUM',
+              description: task.description,
+              difficulty: task.difficulty,
+              estimatedTime: task.estimatedTime,
+              phase: task.phase,
+              relatedTech: task.relatedTech || [],
+              checklist: task.checklist || [],
+              commands: task.commands || [],
+              files: task.files || [],
+              learningNotes: task.learningNotes || [],
+              expectedOutcome: task.expectedOutcome || [],
+              commonErrors: task.commonErrors || [],
+              resources: task.resources || []
             })) || []
           }
         }

@@ -13,8 +13,8 @@ export class AiService {
 
   private getMockBlueprint(level: string) {
     // ─── shared helpers ───────────────────────────────────────────
-    const t = (id: string, category: string, title: string, desc: string, techs: string[]) =>
-      ({ id, category, title, description: desc, relatedTech: techs, status: 'TODO' });
+    const t = (id: string, category: string, title: string, desc: string, techs: string[], richData?: any) =>
+      ({ id, category, phase: richData?.phase || 'Foundation', title, description: desc, relatedTech: techs, status: 'TODO', ...richData });
     const s = (name: string, slug: string, rationale: string, category: string) =>
       ({ name, simpleIconSlug: slug, rationale, category });
 
@@ -41,8 +41,26 @@ export class AiService {
         s('Vitest',          'vitest',       'Lightning-fast unit tests with native ESM support. Works perfectly with Next.js.','Testing'),
       ],
       checklist: [
-        t('mvp-f1','Frontend','Init Next.js + TypeScript + Tailwind','Run `npx create-next-app@latest --typescript`. Configure Tailwind with your brand colors and Inter font via `next/font`. Set up dark mode with `class` strategy in `tailwind.config.ts`.', ['Next.js','TypeScript','Tailwind CSS']),
-        t('mvp-f2','Frontend','Install Shadcn UI & base components','Run `npx shadcn@latest init`. Add Button, Card, Input, Label, Dialog, Sheet, Toast, Badge, Skeleton. Add the global Toaster to your root layout. Test all components in isolation.', ['Shadcn UI','Radix UI']),
+        t('mvp-f1','Frontend','Setup Next.js with App Router & Tailwind','Initialize a Next.js application using the App Router architecture and configure Tailwind CSS for styling. This creates the frontend foundation.', ['Next.js','Tailwind CSS','TypeScript'], {
+          phase: 'Foundation',
+          difficulty: 'Beginner',
+          estimatedTime: '30 mins',
+          checklist: ['Create Next.js project', 'Configure TypeScript', 'Install Tailwind', 'Configure app layout', 'Setup aliases', 'Create homepage', 'Verify development server'],
+          commands: ['npx create-next-app@latest my-app', 'cd my-app', 'npm install -D tailwindcss postcss autoprefixer', 'npm run dev'],
+          files: ['app/layout.tsx', 'app/page.tsx', 'tailwind.config.ts', 'tsconfig.json'],
+          learningNotes: ['Why App Router?', 'Server Components', 'Better performance', 'Streaming', 'Modern Next.js architecture'],
+          expectedOutcome: ['Frontend runs locally on http://localhost:3000', 'Tailwind styling works', 'Layout renders correctly']
+        }),
+        t('mvp-f2','Frontend','Implement Base UI Components','Create the foundational UI components like buttons, inputs, and cards using Shadcn UI. Establish the design system tokens.', ['Next.js','Tailwind CSS'], {
+          phase: 'UI',
+          difficulty: 'Intermediate',
+          estimatedTime: '45 mins',
+          checklist: ['Initialize Shadcn CLI', 'Add Button component', 'Add Input component', 'Add Card component', 'Configure global CSS variables for theming'],
+          commands: ['npx shadcn-ui@latest init', 'npx shadcn-ui@latest add button input card'],
+          files: ['components/ui/button.tsx', 'components/ui/input.tsx', 'components/ui/card.tsx', 'app/globals.css'],
+          learningNotes: ['Utility-first CSS', 'Accessible Radix primitives', 'Copy-paste component architecture'],
+          expectedOutcome: ['Components render correctly in a storybook or test page', 'Dark mode toggles correctly if configured']
+        }),
         t('mvp-f3','Frontend','Build core pages & layout','Create pages: `/` (landing with hero + pricing), `/dashboard` (app shell), `/auth/login`, `/auth/signup`. Add responsive Navbar, mobile hamburger menu, and a 404 page with a helpful message.', ['Next.js','Tailwind CSS']),
         t('mvp-f4','Frontend','Form validation with React Hook Form + Zod','Create reusable Zod schemas for signup, login, and all user-facing forms. Connect to React Hook Form via `@hookform/resolvers/zod`. Show inline field errors on blur. Disable submit button on invalid state.', ['React Hook Form','Zod']),
         t('mvp-f5','Frontend','SEO metadata + Open Graph tags','Add `metadata` exports to every page. Configure `og:image` for social sharing. Add `robots.txt` and `sitemap.xml` via Next.js route handlers. Test with Google\'s Rich Results tool.', ['Next.js']),
@@ -349,7 +367,24 @@ export class AiService {
           { "name": "string", "simpleIconSlug": "string (lowercase icon slug for simpleicons.org)", "rationale": "string", "category": "Frontend, Backend, Database, DevOps, Security, or Testing" }
         ],
         "checklist": [
-          { "id": "string", "category": "string", "title": "string", "description": "string", "relatedTech": ["string"], "status": "TODO" }
+          { 
+            "id": "string", 
+            "category": "string",
+            "phase": "string",
+            "title": "string", 
+            "description": "string", 
+            "difficulty": "Beginner | Intermediate | Advanced",
+            "estimatedTime": "string (e.g. 30 mins, 2 hours)",
+            "relatedTech": ["string"], 
+            "checklist": ["string (actionable sub-steps)"],
+            "commands": ["string (cli commands)"],
+            "files": ["string (paths to create/edit)"],
+            "learningNotes": ["string (key takeaways)"],
+            "expectedOutcome": ["string (what should work after this)"],
+            "commonErrors": ["string (gotchas)"],
+            "resources": [{ "title": "string", "url": "string" }],
+            "status": "TODO" 
+          }
         ],
         "nodes": [
           { "id": "string", "position": { "x": number, "y": number }, "data": { "label": "string" } }

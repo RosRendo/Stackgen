@@ -445,11 +445,28 @@ export function ProjectDashboard() {
                           <div className="flex-1 h-px bg-zinc-800/60" />
                         </div>
 
-                        {/* Task Cards */}
-                        <div className={`border-l-2 ${colors.border} ml-1 pl-5 space-y-4`}>
-                          {tasks.map((task, taskIdx) => {
-                            const stepNum = taskIdx + 1;
-                            const isDone = task.status === 'DONE';
+                        {/* Phases & Tasks */}
+                        <div className={`border-l-2 ${colors.border} ml-1 pl-5 space-y-8 mt-4`}>
+                          {Object.entries(
+                            tasks.reduce((pAcc, t) => {
+                              const p = t.phase || 'Foundation';
+                              if (!pAcc[p]) pAcc[p] = [];
+                              pAcc[p].push(t);
+                              return pAcc;
+                            }, {} as Record<string, ProjectTask[]>)
+                          ).map(([phase, phaseTasks]) => (
+                            <div key={phase} className="space-y-4 relative">
+                              {/* Phase Label inline */}
+                              <div className="absolute -left-5 -top-1 w-10 border-t-2 border-zinc-800" />
+                              <h5 className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-4 pl-7">
+                                {phase}
+                              </h5>
+                              
+                              <div className="space-y-4 pl-4">
+                                {phaseTasks.map((task) => {
+                                  const taskIdx = tasks.indexOf(task);
+                                  const stepNum = taskIdx + 1;
+                                  const isDone = task.status === 'DONE';
                             return (
                               <div 
                                 key={task.id} 
@@ -517,15 +534,18 @@ export function ProjectDashboard() {
                                     )}
                                     <span className="text-[10px] text-zinc-600 ml-auto">Click for details →</span>
                                   </div>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+            )}
               </div>
             </CardContent>
           </Card>
@@ -681,55 +701,145 @@ export function ProjectDashboard() {
                 </div>
 
                 {/* Body */}
-                <div className="px-6 py-5 space-y-6 flex-1">
-
-                  {/* What you'll do */}
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">📋 What you'll do</h4>
-                    <p className="text-sm text-zinc-300 leading-relaxed">
-                      {task.description || 'No description available for this task.'}
-                    </p>
-                  </div>
+                <div className="px-6 py-5 space-y-8 flex-1">
+                  
+                  {/* Stats Row */}
+                  {(task.difficulty || task.estimatedTime) && (
+                    <div className="flex items-center gap-4 text-xs font-medium text-zinc-400">
+                      {task.difficulty && (
+                        <div className="flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+                          <span className={task.difficulty.toLowerCase() === 'beginner' ? 'text-green-400' : task.difficulty.toLowerCase() === 'intermediate' ? 'text-amber-400' : 'text-red-400'}>
+                            ■
+                          </span>
+                          Difficulty: {task.difficulty}
+                        </div>
+                      )}
+                      {task.estimatedTime && (
+                        <div className="flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+                          ⏱ Estimated Time: {task.estimatedTime}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Tools used */}
                   {task.relatedTech && task.relatedTech.length > 0 && (
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">🔧 Tools & Technologies</h4>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Uses</h4>
                       <div className="flex flex-wrap gap-2">
                         {task.relatedTech.map((tech, i) => (
-                          <span key={i} className={`text-xs font-medium px-2.5 py-1 rounded-lg border ${colors.step}`}>
-                            {tech}
+                          <span key={i} className={`text-xs font-medium px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${colors.step}`}>
+                            ✓ {tech}
                           </span>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Why this matters */}
-                  <div className={`p-4 rounded-xl border ${colors.border} ${colors.accent}`}>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">💡 Why this matters</h4>
-                    <p className="text-sm text-zinc-400 leading-relaxed">
-                      This is <strong className={`${colors.label}`}>Step {stepNum}</strong> of your <strong className="text-zinc-300">{cat}</strong> setup.{' '}
-                      {cat === 'Frontend' && 'Getting the frontend foundation right early ensures every UI component and page you build later is consistent, accessible, and maintainable.'}
-                      {cat === 'Backend' && 'A solid backend foundation ensures your API is secure, scalable, and easy to extend as your product grows.'}
-                      {cat === 'Database' && 'Your database schema is the heart of your application — getting it right early avoids costly migrations down the line.'}
-                      {cat === 'DevOps' && 'Good DevOps practices from day one means your team can deploy reliably and confidently throughout the entire development lifecycle.'}
-                      {cat === 'Security' && 'Security is not an afterthought — implementing it here protects your users and data from the very beginning.'}
-                      {cat === 'Testing' && 'Tests give you the confidence to move fast without breaking things. Set them up early and keep them running on every commit.'}
-                      {!['Frontend','Backend','Database','DevOps','Security','Testing'].includes(cat) && 'Complete this step to keep your project on track.'}
+                  {/* Description */}
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Description</h4>
+                    <p className="text-sm text-zinc-300 leading-relaxed">
+                      {task.description || `Implement the core requirements for ${task.title}. Follow standard best practices for ${cat} development to ensure maintainability, security, and scalability.`}
                     </p>
                   </div>
+
+                  {/* Task Internal Checklist */}
+                  {task.checklist && task.checklist.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Checklist</h4>
+                      <div className="space-y-3 pl-1">
+                        {task.checklist.map((item, i) => (
+                          <div key={i} className="flex items-start gap-3">
+                            <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center border-zinc-700 bg-zinc-900 shrink-0`}>
+                            </div>
+                            <span className="text-sm text-zinc-300">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Commands */}
+                  {task.commands && task.commands.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Commands</h4>
+                      <div className="bg-black/60 border border-zinc-800 rounded-lg p-4 font-mono text-xs text-zinc-300 space-y-2 overflow-x-auto">
+                        {task.commands.map((cmd, i) => (
+                          <div key={i} className="flex items-start gap-3">
+                            <span className="text-zinc-600 select-none">$</span>
+                            <span className="break-all whitespace-pre-wrap">{cmd}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Files Created */}
+                  {task.files && task.files.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Files Created</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {task.files.map((file, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-zinc-300 bg-zinc-900/50 border border-zinc-800 px-3 py-2 rounded-md">
+                            <span className="text-zinc-500 text-lg leading-none shrink-0">📄</span>
+                            <span className="truncate">{file}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Learning Notes */}
+                  {task.learningNotes && task.learningNotes.length > 0 && (
+                    <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-3">Learning Notes</h4>
+                      <ul className="space-y-2">
+                        {task.learningNotes.map((note, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+                            <span className="text-blue-500 mt-0.5">•</span>
+                            {note}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Expected Outcome */}
+                  {task.expectedOutcome && task.expectedOutcome.length > 0 && (
+                    <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-400 mb-3">Expected Result</h4>
+                      <ul className="space-y-2">
+                        {task.expectedOutcome.map((outcome, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+                            <span className="text-green-500 mt-0.5">✓</span>
+                            {outcome}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {/* Master Checklist Match */}
                   {(() => {
                     // Find master checklist sections that match this task's category
                     const catKeywords: Record<string, string[]> = {
                       Frontend: ['frontend', 'design', 'ui', 'ux', 'layout', 'component', 'page', 'style', 'css', 'tailwind', 'next', 'react', 'routing'],
-                      Backend:  ['backend', 'api', 'server', 'auth', 'session', 'route', 'service', 'endpoint', 'rest', 'graphql', 'logic'],
-                      Database: ['database', 'db', 'schema', 'sql', 'postgres', 'mysql', 'mongo', 'redis', 'orm', 'prisma', 'migration', 'data', 'storage'],
-                      DevOps:   ['devops', 'deploy', 'docker', 'ci/cd', 'pipeline', 'cloud', 'server', 'host', 'domain', 'ssl', 'monitoring', 'logging', 'performance', 'cdn'],
-                      Security: ['security', 'auth', 'permission', 'rbac', 'rate limit', 'csrf', 'xss', 'https', 'ssl', 'secret', 'vault', 'encryption'],
-                      Testing:  ['test', 'qa', 'e2e', 'unit', 'jest', 'cypress', 'spec', 'mock', 'coverage'],
+                      Backend:  ['backend', 'api', 'server', 'session', 'route', 'service', 'endpoint', 'rest', 'graphql', 'logic', 'microservice'],
+                      Database: ['database', 'db', 'schema', 'sql', 'postgres', 'mysql', 'mongo', 'redis', 'orm', 'prisma', 'migration', 'data'],
+                      Auth:     ['auth', 'authentication', 'login', 'signup', 'sso', 'oauth', 'jwt', 'session', 'cookie', 'clerk', 'supabase auth'],
+                      Payment:  ['payment', 'stripe', 'billing', 'subscription', 'checkout', 'invoice', 'paddle'],
+                      Email:    ['email', 'resend', 'sendgrid', 'ses', 'smtp', 'mail', 'notification'],
+                      Storage:  ['storage', 's3', 'bucket', 'upload', 'file', 'image', 'asset', 'cdn', 'cloudinary'],
+                      Queue:    ['queue', 'bullmq', 'kafka', 'rabbitmq', 'pubsub', 'sqs', 'worker', 'job', 'background', 'event'],
+                      Analytics: ['analytics', 'mixpanel', 'posthog', 'segment', 'google analytics', 'tracking', 'event'],
+                      Monitoring: ['monitoring', 'sentry', 'error', 'uptime', 'datadog', 'new relic', 'health'],
+                      Observability: ['observability', 'grafana', 'prometheus', 'loki', 'tracing', 'opentelemetry', 'logs', 'metrics', 'trace'],
+                      Search:   ['search', 'elasticsearch', 'algolia', 'meilisearch', 'typesense', 'query', 'index'],
+                      AI:       ['ai', 'llm', 'openai', 'claude', 'vector', 'pinecone', 'embedding', 'rag', 'prompt'],
+                      Security: ['security', 'permission', 'rbac', 'rate limit', 'csrf', 'xss', 'https', 'ssl', 'secret', 'vault', 'encryption', 'waf', 'cors'],
+                      DevOps:   ['devops', 'deploy', 'docker', 'ci/cd', 'pipeline', 'cloud', 'server', 'host', 'domain', 'ssl', 'k8s', 'kubernetes', 'terraform'],
+                      Testing:  ['test', 'qa', 'e2e', 'unit', 'jest', 'cypress', 'spec', 'mock', 'coverage', 'playwright', 'vitest', 'k6'],
                     };
                     const keywords = catKeywords[cat] || [];
                     const matchedSections: { sectionTitle: string; items: { label: string; required: boolean }[] }[] = [];

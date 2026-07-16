@@ -8,8 +8,20 @@ export interface ProjectTask {
   category: string;
   title: string;
   description?: string;
-  relatedTech?: string[];
   status: TaskStatus;
+  
+  // Rich details
+  phase?: string;
+  difficulty?: string;
+  estimatedTime?: string;
+  relatedTech?: string[];
+  checklist?: string[];
+  commands?: string[];
+  files?: string[];
+  learningNotes?: string[];
+  expectedOutcome?: string[];
+  commonErrors?: string[];
+  resources?: { title: string; url: string }[];
 }
 
 export type ComplexityLevel = 'MVP' | 'Startup' | 'Professional' | 'Enterprise';
