@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/marketing/hero';
 import { Header } from '@/components/marketing/header';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const ShowcaseSection = dynamic(() => import('@/components/marketing/showcase').then(mod => mod.ShowcaseSection));
 const FeaturesSection = dynamic(() => import('@/components/marketing/features').then(mod => mod.FeaturesSection));
@@ -29,8 +30,9 @@ export default function Home() {
             &copy; {new Date().getFullYear()} StackGen, Inc. All rights reserved.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="text-sm text-zinc-400 hover:text-white">Terms</a>
-            <a href="#" className="text-sm text-zinc-400 hover:text-white">Privacy</a>
+            <Link href="/terms" className="text-sm text-zinc-400 hover:text-white">Terms</Link>
+            <Link href="/privacy" className="text-sm text-zinc-400 hover:text-white">Privacy</Link>
+            <Link href="/refund" className="text-sm text-zinc-400 hover:text-white">Refund</Link>
             <a href="mailto:contact@stackgen.site" className="text-sm text-zinc-400 hover:text-white">Contact</a>
           </div>
         </div>
