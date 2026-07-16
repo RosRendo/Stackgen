@@ -61,4 +61,10 @@ export const auth = betterAuth({
     }
   },
   trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000', 'https://stackgen.site', 'https://www.stackgen.site'],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true
+    }
+  }
 });
