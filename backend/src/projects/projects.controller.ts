@@ -22,7 +22,7 @@ export class ProjectsController {
     const session = await auth.api.getSession({
       headers: req.headers as any
     });
-    if (!session || !session.user || session.user.email !== 'rousrendo@gmail.com') {
+    if (!session || !session.user || session.user.email.toLowerCase() !== 'rousrendo@gmail.com') {
       throw new UnauthorizedException('Admin access required');
     }
     return this.projectsService.getAllProjectsForAdmin();
