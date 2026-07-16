@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { MASTER_CHECKLIST } from '@/data/master-checklist-data';
 
 export function getCategoryFromLabel(label: string): 'Frontend' | 'Backend' | 'Database' | 'DevOps' | 'Testing' | null {
   const l = label.toLowerCase();
@@ -646,6 +647,73 @@ export function ProjectDashboard() {
                       {!['Frontend','Backend','Database','DevOps','Security','Testing'].includes(cat) && 'Complete this step to keep your project on track.'}
                     </p>
                   </div>
+
+                  {/* Master Checklist Match */}
+                  {(() => {
+                    // Find master checklist sections that match this task's category
+                    const catKeywords: Record<string, string[]> = {
+                      Frontend: ['frontend', 'design', 'ui', 'ux', 'layout', 'component', 'page', 'style', 'css', 'tailwind', 'next', 'react', 'routing'],
+                      Backend:  ['backend', 'api', 'server', 'auth', 'session', 'route', 'service', 'endpoint', 'rest', 'graphql', 'logic'],
+                      Database: ['database', 'db', 'schema', 'sql', 'postgres', 'mysql', 'mongo', 'redis', 'orm', 'prisma', 'migration', 'data', 'storage'],
+                      DevOps:   ['devops', 'deploy', 'docker', 'ci/cd', 'pipeline', 'cloud', 'server', 'host', 'domain', 'ssl', 'monitoring', 'logging', 'performance', 'cdn'],
+                      Security: ['security', 'auth', 'permission', 'rbac', 'rate limit', 'csrf', 'xss', 'https', 'ssl', 'secret', 'vault', 'encryption'],
+                      Testing:  ['test', 'qa', 'e2e', 'unit', 'jest', 'cypress', 'spec', 'mock', 'coverage'],
+                    };
+                    const keywords = catKeywords[cat] || [];
+                    const matchedSections: { sectionTitle: string; items: { label: string; required: boolean }[] }[] = [];
+
+                    MASTER_CHECKLIST.forEach(phase => {
+                      phase.sections.forEach((section: any) => {
+                        const stl = section.title.toLowerCase();
+                        if (keywords.some(kw => stl.includes(kw))) {
+                          matchedSections.push({
+                            sectionTitle: section.title,
+                            items: section.items.slice(0, 6), // max 6 items
+                          });
+                        }
+                      });
+                    });
+
+                    if (matchedSections.length === 0) return null;
+
+                    return (
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">✅ Master Checklist — Foundation Steps</h4>
+                        <div className="space-y-3">
+                          {matchedSections.slice(0, 3).map((section, si) => (
+                            <div key={si} className={`rounded-xl border ${colors.border} bg-zinc-900/30 overflow-hidden`}>
+                              <div className={`px-3 py-2 text-xs font-semibold ${colors.label} ${colors.accent} border-b ${colors.border}`}>
+                                {section.sectionTitle}
+                              </div>
+                              <ul className="divide-y divide-zinc-800/40">
+                                {section.items.map((item: any, ii: number) => (
+                                  <li key={ii} className="flex items-start gap-2.5 px-3 py-2">
+                                    <div className={`w-3.5 h-3.5 rounded border shrink-0 mt-0.5 flex items-center justify-center ${
+                                      item.required ? `${colors.accent} ${colors.border}` : 'border-zinc-700 bg-zinc-900'
+                                    }`}>
+                                      {item.required && <div className={`w-1.5 h-1.5 rounded-sm ${colors.dot}`} />}
+                                    </div>
+                                    <span className={`text-xs leading-relaxed ${item.required ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                                      {item.label}
+                                      {!item.required && <span className="ml-1 text-[9px] text-yellow-600/70 bg-yellow-900/20 px-1 rounded">optional</span>}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                          {matchedSections.length > 3 && (
+                            <p className="text-xs text-zinc-600 text-center">
+                              +{matchedSections.length - 3} more sections in the{' '}
+                              <button onClick={() => { setSelectedTaskDetail(null); if (projectId) router.push(`/projects/${projectId}/checklist`); }} className="text-blue-400 underline hover:text-blue-300">
+                                Full Checklist
+                              </button>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Step context (prev / next) */}
                   <div>
