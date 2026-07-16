@@ -8,9 +8,10 @@ export class ProjectsService {
   async saveProject(userId: string, data: any) {
     try {
       const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const isAdmin = user?.email === 'rousrendo@gmail.com';
       const isPaid = user?.subscriptionStatus === 'active' || (user?.subscriptionTier && user?.subscriptionTier !== 'Free' && user?.subscriptionTier !== 'MVP');
       
-      if (!isPaid) {
+      if (!isPaid && !isAdmin) {
         const projectCount = await this.prisma.project.count({ where: { userId } });
         if (projectCount >= 1) {
           throw new HttpException('Free tier is limited to 1 project. Please upgrade your plan to create more.', HttpStatus.PAYMENT_REQUIRED);
