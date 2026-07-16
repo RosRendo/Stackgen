@@ -46,6 +46,7 @@ export function ProjectDashboard() {
 
   const [selectedTech, setSelectedTech] = useState<TechItem | null>(null);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
+  const [selectedTaskDetail, setSelectedTaskDetail] = useState<{ task: ProjectTask; stepNum: number; cat: string; allTasks: ProjectTask[] } | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
   const [dashboardFilterCategory, setDashboardFilterCategory] = useState<'Frontend' | 'Backend' | 'Database' | 'DevOps' | 'Testing' | null>(null);
@@ -389,11 +390,12 @@ export function ProjectDashboard() {
                             return (
                               <div 
                                 key={task.id} 
-                                className={`relative rounded-xl border transition-all duration-200 ${
+                                className={`relative rounded-xl border transition-all duration-200 cursor-pointer ${
                                   isDone 
                                     ? 'border-zinc-800/40 bg-zinc-900/10 opacity-60' 
-                                    : `border-zinc-800/60 bg-zinc-900/40 hover:bg-zinc-900/70 hover:${colors.border}`
+                                    : `border-zinc-800/60 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700`
                                 }`}
+                                onClick={() => setSelectedTaskDetail({ task, stepNum, cat, allTasks: tasks })}
                               >
                                 {/* Step Number Badge */}
                                 <div className={`absolute -left-8 top-4 w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-bold ${
@@ -408,7 +410,8 @@ export function ProjectDashboard() {
                                     <div className="flex items-start gap-3 flex-1 min-w-0">
                                       <Checkbox 
                                         checked={isDone} 
-                                        onCheckedChange={() => toggleTaskStatus(task.id)}
+                                        onCheckedChange={(e) => { (e as React.MouseEvent)?.stopPropagation?.(); toggleTaskStatus(task.id); }}
+                                        onClick={(e) => e.stopPropagation()}
                                         className={`mt-0.5 border-zinc-700 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 shrink-0`}
                                       />
                                       <div>
@@ -427,39 +430,29 @@ export function ProjectDashboard() {
                                     ) : null}
                                   </div>
 
-                                  {/* Description */}
+                                  {/* Description — truncated preview */}
                                   {task.description && (
-                                    <p className={`text-xs leading-relaxed mt-2 ml-7 ${isDone ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                                    <p className={`text-xs leading-relaxed mt-2 ml-7 line-clamp-2 ${isDone ? 'text-zinc-600' : 'text-zinc-400'}`}>
                                       {task.description}
                                     </p>
                                   )}
 
-                                  {/* Footer: tech + CTA */}
+                                  {/* Footer: tech + hint */}
                                   <div className="flex items-center justify-between gap-4 mt-3 ml-7">
                                     {task.relatedTech && task.relatedTech.length > 0 && (
                                       <div className="flex items-center gap-1.5 flex-wrap">
                                         <span className="text-[9px] text-zinc-600 mr-0.5">Uses:</span>
-                                        {task.relatedTech.map((tech, i) => (
+                                        {task.relatedTech.slice(0, 3).map((tech, i) => (
                                           <span key={i} className={`text-[9px] font-medium px-1.5 py-0.5 rounded border whitespace-nowrap ${
                                             isDone ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800' : 'bg-zinc-800/80 text-zinc-300 border-zinc-700'
                                           }`}>
                                             {tech}
                                           </span>
                                         ))}
+                                        {task.relatedTech.length > 3 && <span className="text-[9px] text-zinc-600">+{task.relatedTech.length - 3} more</span>}
                                       </div>
                                     )}
-                                    <button
-                                      disabled={isDone}
-                                      onClick={() => handleGeneratePrompt(task)}
-                                      className={`flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border transition-all shrink-0 ${
-                                        isDone 
-                                          ? 'opacity-30 cursor-not-allowed border-zinc-800 text-zinc-600' 
-                                          : `${colors.step} border hover:opacity-80`
-                                      }`}
-                                    >
-                                      <Terminal className="w-3 h-3" />
-                                      Get AI Instructions
-                                    </button>
+                                    <span className="text-[10px] text-zinc-600 ml-auto">Click for details →</span>
                                   </div>
                                 </div>
                               </div>
@@ -563,6 +556,143 @@ export function ProjectDashboard() {
               </p>
             </div>
           </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Task Detail Sidebar */}
+      <Sheet open={!!selectedTaskDetail} onOpenChange={(open) => !open && setSelectedTaskDetail(null)}>
+        <SheetContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-lg w-full overflow-y-auto flex flex-col gap-0 p-0">
+          {selectedTaskDetail && (() => {
+            const { task, stepNum, cat, allTasks } = selectedTaskDetail;
+            const isDone = task.status === 'DONE';
+            const catColors: Record<string, { border: string; label: string; accent: string; step: string; dot: string }> = {
+              Frontend: { border: 'border-pink-500/30',  label: 'text-pink-400',  accent: 'bg-pink-500/10',  step: 'bg-pink-500/10 text-pink-300 border-pink-500/20',  dot: 'bg-pink-500' },
+              Backend:  { border: 'border-green-500/30', label: 'text-green-400', accent: 'bg-green-500/10', step: 'bg-green-500/10 text-green-300 border-green-500/20', dot: 'bg-green-500' },
+              Database: { border: 'border-blue-500/30',  label: 'text-blue-400',  accent: 'bg-blue-500/10',  step: 'bg-blue-500/10 text-blue-300 border-blue-500/20',  dot: 'bg-blue-500' },
+              DevOps:   { border: 'border-yellow-500/30',label: 'text-yellow-400',accent: 'bg-yellow-500/10',step: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',dot: 'bg-yellow-500' },
+              Security: { border: 'border-orange-500/30',label: 'text-orange-400',accent: 'bg-orange-500/10',step: 'bg-orange-500/10 text-orange-300 border-orange-500/20',dot: 'bg-orange-500' },
+              Testing:  { border: 'border-purple-500/30',label: 'text-purple-400',accent: 'bg-purple-500/10',step: 'bg-purple-500/10 text-purple-300 border-purple-500/20',dot: 'bg-purple-500' },
+            };
+            const colors = catColors[cat] || { border: 'border-zinc-700', label: 'text-zinc-400', accent: 'bg-zinc-800', step: 'bg-zinc-800 text-zinc-300 border-zinc-700', dot: 'bg-zinc-500' };
+            const prevTask = allTasks[stepNum - 2] || null;
+            const nextTask = allTasks[stepNum] || null;
+
+            return (
+              <>
+                {/* Header band */}
+                <div className={`px-6 pt-8 pb-5 ${colors.accent} border-b ${colors.border}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-2 h-2 rounded-full ${colors.dot}`} />
+                    <span className={`text-xs font-bold uppercase tracking-widest ${colors.label}`}>{cat}</span>
+                    <span className="text-zinc-600 text-xs">•</span>
+                    <span className="text-zinc-500 text-xs">Step {stepNum} of {allTasks.length}</span>
+                  </div>
+                  <SheetTitle className={`text-xl font-bold leading-snug ${isDone ? 'line-through text-zinc-500' : 'text-white'}`}>
+                    {task.title}
+                  </SheetTitle>
+                  <div className="flex items-center gap-2 mt-3">
+                    {isDone ? (
+                      <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full">✓ Completed</span>
+                    ) : stepNum === 1 ? (
+                      <span className={`text-xs font-semibold border px-2.5 py-1 rounded-full ${colors.step}`}>▶ Start here</span>
+                    ) : (
+                      <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">Up next</span>
+                    )}
+                    <Checkbox
+                      checked={isDone}
+                      onCheckedChange={() => { toggleTaskStatus(task.id); setSelectedTaskDetail(prev => prev ? { ...prev, task: { ...prev.task, status: isDone ? 'TODO' : 'DONE' } } : null); }}
+                      className="border-zinc-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 ml-auto"
+                    />
+                    <span className="text-xs text-zinc-500">{isDone ? 'Mark incomplete' : 'Mark done'}</span>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="px-6 py-5 space-y-6 flex-1">
+
+                  {/* What you'll do */}
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">📋 What you'll do</h4>
+                    <p className="text-sm text-zinc-300 leading-relaxed">
+                      {task.description || 'No description available for this task.'}
+                    </p>
+                  </div>
+
+                  {/* Tools used */}
+                  {task.relatedTech && task.relatedTech.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">🔧 Tools & Technologies</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {task.relatedTech.map((tech, i) => (
+                          <span key={i} className={`text-xs font-medium px-2.5 py-1 rounded-lg border ${colors.step}`}>
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Why this matters */}
+                  <div className={`p-4 rounded-xl border ${colors.border} ${colors.accent}`}>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">💡 Why this matters</h4>
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      This is <strong className={`${colors.label}`}>Step {stepNum}</strong> of your <strong className="text-zinc-300">{cat}</strong> setup.{' '}
+                      {cat === 'Frontend' && 'Getting the frontend foundation right early ensures every UI component and page you build later is consistent, accessible, and maintainable.'}
+                      {cat === 'Backend' && 'A solid backend foundation ensures your API is secure, scalable, and easy to extend as your product grows.'}
+                      {cat === 'Database' && 'Your database schema is the heart of your application — getting it right early avoids costly migrations down the line.'}
+                      {cat === 'DevOps' && 'Good DevOps practices from day one means your team can deploy reliably and confidently throughout the entire development lifecycle.'}
+                      {cat === 'Security' && 'Security is not an afterthought — implementing it here protects your users and data from the very beginning.'}
+                      {cat === 'Testing' && 'Tests give you the confidence to move fast without breaking things. Set them up early and keep them running on every commit.'}
+                      {!['Frontend','Backend','Database','DevOps','Security','Testing'].includes(cat) && 'Complete this step to keep your project on track.'}
+                    </p>
+                  </div>
+
+                  {/* Step context (prev / next) */}
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">🗺️ Step Context</h4>
+                    <div className="space-y-2">
+                      {prevTask && (
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/60 opacity-70">
+                          <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded mt-0.5 shrink-0">PREV</span>
+                          <span className={`text-xs ${prevTask.status === 'DONE' ? 'line-through text-zinc-600' : 'text-zinc-400'}`}>{prevTask.title}</span>
+                          {prevTask.status === 'DONE' && <span className="text-green-500 text-xs ml-auto shrink-0">✓</span>}
+                        </div>
+                      )}
+                      <div className={`flex items-start gap-3 p-3 rounded-lg border-2 ${colors.border} bg-zinc-900/60`}>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded mt-0.5 shrink-0 ${colors.step} border`}>NOW</span>
+                        <span className="text-xs text-zinc-200 font-medium">{task.title}</span>
+                      </div>
+                      {nextTask && (
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/20 border border-zinc-800/40 opacity-50">
+                          <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded mt-0.5 shrink-0">NEXT</span>
+                          <span className="text-xs text-zinc-500">{nextTask.title}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer CTA */}
+                <div className="px-6 py-5 border-t border-zinc-800 bg-zinc-950 space-y-3">
+                  <button
+                    disabled={isDone}
+                    onClick={() => { setSelectedTaskDetail(null); handleGeneratePrompt(task); }}
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${
+                      isDone 
+                        ? 'opacity-30 cursor-not-allowed bg-zinc-800 text-zinc-600 border border-zinc-700'
+                        : `${colors.accent} ${colors.label} border-2 ${colors.border} hover:opacity-90`
+                    }`}
+                  >
+                    <Terminal className="w-4 h-4" />
+                    Get AI Instructions for this Step
+                  </button>
+                  <p className="text-[11px] text-zinc-600 text-center">
+                    Generates a ready-to-paste prompt for Cursor, Copilot, or ChatGPT tailored to your full project stack.
+                  </p>
+                </div>
+              </>
+            );
+          })()}
         </SheetContent>
       </Sheet>
 
