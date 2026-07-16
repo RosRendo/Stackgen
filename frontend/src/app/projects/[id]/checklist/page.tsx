@@ -24,13 +24,15 @@ export default function ProjectChecklistPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/admin/all`) // Doing this simple hack since we don't have a single project route in the backend immediately visible
-      .then(res => res.json())
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${id}`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
       .then(data => {
-        if (Array.isArray(data)) {
-          const found = data.find(p => p.id === id);
-          setProject(found || null);
-        }
+        setProject(data || null);
         setLoading(false);
       })
       .catch(err => {
