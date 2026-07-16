@@ -70,7 +70,35 @@ export function TechStackBoard() {
                    'Backend') as TechItem['category'],
         optional: false,
       };
-      setGeneratedData({ techStack: [...techStack, newTech], checklist, nodes, edges });
+      const techCategory = newTech.category || 'Backend';
+      
+      // Ensure there is a node for this category
+      let updatedNodes = [...nodes];
+      
+      // We need a helper to check if a node exists for this category
+      // It's a bit tricky since node mapping is string based. We'll use a simple check:
+      const categoryExists = nodes.some(n => {
+        const l = (n.data?.label as string || '').toLowerCase();
+        if (techCategory === 'Frontend') return l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react') || l.includes('mfe');
+        if (techCategory === 'Backend') return l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express') || l.includes('worker') || l.includes('gateway') || l.includes('core');
+        if (techCategory === 'Database') return l.includes('database') || l.includes('db') || l.includes('data') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache') || l.includes('kafka') || l.includes('cassandra') || l.includes('storage') || l.includes('bus');
+        if (techCategory === 'DevOps') return l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s') || l.includes('infra') || l.includes('cluster');
+        if (techCategory === 'Testing') return l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress') || l.includes('security') || l.includes('auth');
+        return false;
+      });
+
+      if (!categoryExists) {
+        // Find highest Y position to place the new node at the bottom
+        const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.position.y)) : 0;
+        updatedNodes.push({
+          id: `dyn-node-${techCategory.toLowerCase()}-${Date.now()}`,
+          type: 'tier',
+          position: { x: 250, y: maxY + 150 },
+          data: { label: `${techCategory} Tier` }
+        });
+      }
+
+      setGeneratedData({ techStack: [...techStack, newTech], checklist, nodes: updatedNodes, edges });
     }
   };
 
