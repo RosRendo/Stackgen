@@ -4821,60 +4821,74 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
             <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">Project Specific</span>
           </h3>
           {localAiChecklist && localAiChecklist.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[250px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700">
-              {localAiChecklist.map((task, idx) => {
-                const catStr = (task.category || '').toLowerCase();
-                const matchedFilter = FILTER_CATEGORIES.find(c => catStr.includes(c.key.toLowerCase()))?.key;
-                
-                return (
-                  <div key={task.id || idx} className="flex items-start gap-3 p-3 bg-zinc-950 rounded border border-zinc-800 hover:border-zinc-700 transition-colors">
-                    <Checkbox 
-                      checked={task.status === 'DONE'} 
-                      onCheckedChange={() => task.id && toggleAiTask(task.id)}
-                      className="mt-1 border-zinc-700 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 w-full pr-2">
-                      <div className="flex items-start justify-between gap-4">
-                        <button 
-                          onClick={() => matchedFilter && toggleCategory(matchedFilter)}
-                          className={`text-left w-fit px-1 -mx-1 rounded transition-colors ${
-                            matchedFilter && activeCategories.has(matchedFilter) 
-                              ? 'bg-purple-500/20 ring-1 ring-purple-500/50' 
-                              : 'hover:bg-purple-500/10'
-                          }`}
-                          title="Click to filter the Master Checklist below by this category"
-                        >
-                          <span className="text-xs text-purple-400 font-bold uppercase tracking-wider hover:underline">{task.category}</span>
-                        </button>
-                        
-                        {task.relatedTech && task.relatedTech.length > 0 && (
-                          <div className="flex items-center gap-1 flex-wrap justify-end mt-0.5">
-                            {task.relatedTech.map((tech: string, i: number) => (
-                              <span key={i} className="text-[9px] font-medium bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700 whitespace-nowrap">
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+            <div className="space-y-6 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700">
+              {Object.entries(
+                localAiChecklist.reduce((acc: any, task: any) => {
+                  const cat = task.category || 'Uncategorized';
+                  if (!acc[cat]) acc[cat] = [];
+                  acc[cat].push(task);
+                  return acc;
+                }, {})
+              ).map(([category, tasks]: [string, any], catIdx) => (
+                <div key={catIdx} className="space-y-3">
+                  <h4 className="text-xs font-bold text-purple-400 uppercase tracking-wider pl-1">{category}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {tasks.map((task: any, idx: number) => {
+                      const catStr = (task.category || '').toLowerCase();
+                      const matchedFilter = FILTER_CATEGORIES.find(c => catStr.includes(c.key.toLowerCase()))?.key;
                       
-                      <span 
-                        className={`text-sm font-semibold cursor-pointer hover:text-blue-400 transition-colors mt-1 ${task.status === 'DONE' ? 'line-through text-zinc-500' : 'text-zinc-200'}`}
-                        onClick={() => setSearchQuery(task.title)}
-                        title="Click to search for this task in the Master Checklist below"
-                      >
-                        {task.title}
-                      </span>
+                      return (
+                        <div key={task.id || idx} className="flex items-start gap-3 p-3 bg-zinc-950 rounded border border-zinc-800 hover:border-zinc-700 transition-colors">
+                          <Checkbox 
+                            checked={task.status === 'DONE'} 
+                            onCheckedChange={() => task.id && toggleAiTask(task.id)}
+                            className="mt-1 border-zinc-700 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 shrink-0"
+                          />
+                          <div className="flex flex-col gap-1 w-full pr-2">
+                            <div className="flex items-start justify-between gap-4">
+                              <button 
+                                onClick={() => matchedFilter && toggleCategory(matchedFilter)}
+                                className={`text-left w-fit px-1 -mx-1 rounded transition-colors ${
+                                  matchedFilter && activeCategories.has(matchedFilter) 
+                                    ? 'bg-purple-500/20 ring-1 ring-purple-500/50' 
+                                    : 'hover:bg-purple-500/10'
+                                }`}
+                                title="Click to filter the Master Checklist below by this category"
+                              >
+                                <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider hover:underline opacity-80">{task.category}</span>
+                              </button>
+                              
+                              {task.relatedTech && task.relatedTech.length > 0 && (
+                                <div className="flex items-center gap-1 flex-wrap justify-end mt-0.5">
+                                  {task.relatedTech.map((tech: string, i: number) => (
+                                    <span key={i} className="text-[9px] font-medium bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700 whitespace-nowrap">
+                                      {tech}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            
+                            <span 
+                              className={`text-sm font-semibold cursor-pointer hover:text-blue-400 transition-colors mt-1 ${task.status === 'DONE' ? 'line-through text-zinc-500' : 'text-zinc-200'}`}
+                              onClick={() => setSearchQuery(task.title)}
+                              title="Click to search for this task in the Master Checklist below"
+                            >
+                              {task.title}
+                            </span>
 
-                      {task.description && (
-                        <p className={`text-xs leading-relaxed mt-1 ${task.status === 'DONE' ? 'text-zinc-600 line-through' : 'text-zinc-400'}`}>
-                          {task.description}
-                        </p>
-                      )}
-                    </div>
+                            {task.description && (
+                              <p className={`text-xs leading-relaxed mt-1 ${task.status === 'DONE' ? 'text-zinc-600 line-through' : 'text-zinc-400'}`}>
+                                {task.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-zinc-500 text-sm italic py-4 bg-zinc-950/50 rounded-lg text-center border border-dashed border-zinc-800">
