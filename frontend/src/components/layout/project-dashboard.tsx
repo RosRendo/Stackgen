@@ -59,6 +59,14 @@ export function ProjectDashboard() {
     }));
   }, [architectureNodes]);
 
+  const flowEdges = useMemo(() => {
+    return architectureEdges.map(edge => ({
+      ...edge,
+      animated: true,
+      style: { stroke: '#60a5fa', strokeWidth: 2, opacity: 0.8 },
+    }));
+  }, [architectureEdges]);
+
   const filteredChecklist = useMemo(() => {
     if (!dashboardFilterCategory) return checklist;
     return checklist.filter(task => {
@@ -235,7 +243,7 @@ export function ProjectDashboard() {
             <CardContent className="p-0 flex-1 relative">
               <ReactFlow 
                 nodes={flowNodes} 
-                edges={architectureEdges} 
+                edges={flowEdges} 
                 nodeTypes={nodeTypes}
                 onNodesChange={(changes) => {
                   setGeneratedData({
