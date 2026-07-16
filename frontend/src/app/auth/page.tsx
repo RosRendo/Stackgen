@@ -25,7 +25,7 @@ export default function AuthPage() {
     try {
       await authClient.signIn.social({
         provider,
-        callbackURL: '/dashboard'
+        callbackURL: `${window.location.origin}/dashboard`
       });
     } catch (err) {
       console.error(`${provider} auth error:`, err);
