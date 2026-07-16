@@ -65,7 +65,7 @@ export default function AdminDashboard() {
         console.error(err);
         setLoading(false);
       });
-  }, []);
+  }, [isPending, session]);
 
   if (loading) {
     return <div className="flex h-screen items-center justify-center text-zinc-400">Loading all enterprise data...</div>;
