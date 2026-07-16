@@ -1,8 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaClient } from '@prisma/client';
+import { Resend } from 'resend';
 
 const prisma = new PrismaClient({ log: ['info'] });
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -10,6 +12,26 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      if (!process.env.RESEND_API_KEY) {
+        console.log(`[Email Verification URL for ${user.email}]: ${url}`);
+        return;
+      }
+      try {
+        await resend.emails.send({
+          from: 'StackGen <noreply@stackgen.site>',
+          to: user.email,
+          subject: 'Verify your email address - StackGen',
+          html: `<p>Hi ${user.name},</p><p>Welcome to StackGen! Please verify your email by clicking the link below:</p><br/><a href="${url}" style="padding: 10px 20px; background-color: #9333ea; color: white; border-radius: 6px; text-decoration: none;">Verify my email</a>`
+        });
+      } catch (err) {
+        console.error('Failed to send verification email', err);
+      }
+    },
   },
   user: {
     additionalFields: {

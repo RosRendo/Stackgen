@@ -17,6 +17,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   const router = useRouter();
 
   const handleSocialLogin = async (provider: 'github' | 'google') => {
@@ -37,11 +38,14 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isLogin) {
-        await authClient.signIn.email({ email, password });
+        const res = await authClient.signIn.email({ email, password });
+        if (res.error) throw res.error;
+        router.push('/dashboard');
       } else {
-        await authClient.signUp.email({ email, password, name });
+        const res = await authClient.signUp.email({ email, password, name });
+        if (res.error) throw res.error;
+        setVerificationSent(true);
       }
-      router.push('/dashboard');
     } catch (err) {
       console.error('Auth error:', err);
     } finally {
@@ -71,11 +75,32 @@ export default function AuthPage() {
           <h1 className="text-xl font-medium tracking-tight text-zinc-100">
             {isLogin ? 'Log in to your account' : 'Create your account'}
           </h1>
-          <p className="text-sm text-zinc-400 mt-1.5">
-            {isLogin ? 'Enter your details below to log in' : 'Enter your details below to sign up'}
+          <p className="text-sm text-zinc-400 mt-1.5 text-center">
+            {verificationSent 
+              ? 'We have sent a verification link to your email.' 
+              : isLogin 
+                ? 'Enter your details below to log in' 
+                : 'Enter your details below to sign up'}
           </p>
         </div>
 
+        {verificationSent ? (
+          <Card className="bg-zinc-950/80 border border-zinc-800/80 shadow-xl rounded-xl">
+            <CardContent className="pt-8 px-6 pb-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mb-6">
+                <Mail className="w-8 h-8 text-purple-400" />
+              </div>
+              <h2 className="text-xl font-medium text-zinc-100 mb-2">Check your email</h2>
+              <p className="text-zinc-400 text-sm mb-6">
+                We've sent a verification link to <span className="text-zinc-200 font-medium">{email}</span>. 
+                Please click the link to activate your account.
+              </p>
+              <Button onClick={() => setVerificationSent(false)} variant="outline" className="bg-transparent border-zinc-800 text-zinc-300 w-full hover:bg-zinc-900">
+                Back to login
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <Card className="bg-zinc-950/80 border border-zinc-800/80 shadow-xl rounded-xl">
           <CardContent className="pt-6 px-6">
             <div className="grid grid-cols-2 gap-3 mb-6">
@@ -182,6 +207,7 @@ export default function AuthPage() {
             </button>
           </CardFooter>
         </Card>
+        )}
       </motion.div>
     </div>
   );
