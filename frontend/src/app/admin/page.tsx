@@ -37,7 +37,7 @@ export default function AdminDashboard() {
         router.push('/');
         return;
       }
-      const isAdmin = session.user.email === 'admin@servicefinder.com' || session.user.email === 'test@example.com';
+      const isAdmin = session.user.email === 'rousrendo@gmail.com';
       if (!isAdmin) {
         router.push('/');
         return;

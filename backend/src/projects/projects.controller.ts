@@ -18,7 +18,13 @@ export class ProjectsController {
   }
 
   @Get('admin/all')
-  async getAllProjects() {
+  async getAllProjects(@Req() req: Request) {
+    const session = await auth.api.getSession({
+      headers: req.headers as any
+    });
+    if (!session || !session.user || session.user.email !== 'rousrendo@gmail.com') {
+      throw new UnauthorizedException('Admin access required');
+    }
     return this.projectsService.getAllProjectsForAdmin();
   }
 
