@@ -48,7 +48,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isPending || !session) return;
     
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/admin/all`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/admin/all`, {
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
