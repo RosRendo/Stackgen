@@ -67,7 +67,7 @@ export function ProjectDashboard() {
   const [selectedTaskDetail, setSelectedTaskDetail] = useState<{ task: ProjectTask; stepNum: number; cat: string; allTasks: ProjectTask[] } | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
-  const [dashboardFilterCategory, setDashboardFilterCategory] = useState<'Frontend' | 'Backend' | 'Database' | 'DevOps' | 'Testing' | null>(null);
+  const [dashboardFilterCategory, setDashboardFilterCategory] = useState<AppCategory | null>(null);
 
   const nodeTypes = useMemo(() => ({ tier: ArchitectureTierNode }), []);
 
@@ -473,7 +473,7 @@ export function ProjectDashboard() {
                                     <div className="flex items-start gap-3 flex-1 min-w-0">
                                       <Checkbox 
                                         checked={isDone} 
-                                        onCheckedChange={(e) => { (e as React.MouseEvent)?.stopPropagation?.(); toggleTaskStatus(task.id); }}
+                                        onCheckedChange={() => { toggleTaskStatus(task.id); }}
                                         onClick={(e) => e.stopPropagation()}
                                         className={`mt-0.5 border-zinc-700 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 shrink-0`}
                                       />

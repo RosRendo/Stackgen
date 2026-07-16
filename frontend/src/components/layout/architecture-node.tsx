@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { useProjectStore, TechItem } from '@/store/project-store';
 import { TECH_ENCYCLOPEDIA } from '@/data/tech-stack-data';
-import { LayoutDashboard, Server, Database, Cloud, Shield, Check, Trash2, ExternalLink, Plus } from 'lucide-react';
+import { LayoutDashboard, Server, Database, Cloud, Shield, Lock, CreditCard, Mail, HardDrive, Layers, BarChart2, Activity, Eye, Search, Bot, Zap, Code, Trash2, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,11 +23,23 @@ export function ArchitectureTierNode({ data, id }: { data: any; id: string }) {
   const category = useMemo(() => {
     const label = data.label || '';
     const l = label.toLowerCase();
+    if (l.includes('auth') || l.includes('identity') || l.includes('login') || l.includes('sso') || l.includes('cognito') || l.includes('keycloak') || l.includes('clerk') || l.includes('vault') || l.includes('opa')) return 'Auth';
+    if (l.includes('payment') || l.includes('stripe') || l.includes('billing') || l.includes('subscription')) return 'Payment';
+    if (l.includes('email') || l.includes('ses') || l.includes('resend') || l.includes('mail')) return 'Email';
+    if (l.includes('storage') || l.includes('s3') || l.includes('r2') || l.includes('blob') || l.includes('bucket')) return 'Storage';
+    if (l.includes('queue') || l.includes('mq') || l.includes('kafka') || l.includes('bull') || l.includes('pubsub') || l.includes('event')) return 'Queue';
+    if (l.includes('analytics') || l.includes('mixpanel') || l.includes('posthog') || l.includes('segment')) return 'Analytics';
+    if (l.includes('monitoring') || l.includes('sentry') || l.includes('new relic') || l.includes('datadog')) return 'Monitoring';
+    if (l.includes('observability') || l.includes('grafana') || l.includes('prometheus') || l.includes('tracing') || l.includes('loki') || l.includes('jaeger')) return 'Observability';
+    if (l.includes('search') || l.includes('elasticsearch') || l.includes('algolia') || l.includes('meilisearch')) return 'Search';
+    if (l.includes('ai') || l.includes('llm') || l.includes('openai') || l.includes('claude') || l.includes('pinecone') || l.includes('vector')) return 'AI';
+    if (l.includes('security') || l.includes('waf') || l.includes('iam') || l.includes('guardduty') || l.includes('istio')) return 'Security';
+    
     if (l.includes('frontend') || l.includes('client') || l.includes('web') || l.includes('ui') || l.includes('app') || l.includes('next') || l.includes('react') || l.includes('mfe')) return 'Frontend';
     if (l.includes('backend') || l.includes('api') || l.includes('server') || l.includes('service') || l.includes('nest') || l.includes('express') || l.includes('worker') || l.includes('gateway') || l.includes('core')) return 'Backend';
-    if (l.includes('database') || l.includes('db') || l.includes('data') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache') || l.includes('kafka') || l.includes('cassandra') || l.includes('storage') || l.includes('bus')) return 'Database';
-    if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s') || l.includes('infra') || l.includes('cluster')) return 'DevOps';
-    if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress') || l.includes('security') || l.includes('auth')) return 'Testing';
+    if (l.includes('database') || l.includes('db') || l.includes('data') || l.includes('postgres') || l.includes('mysql') || l.includes('mongodb') || l.includes('redis') || l.includes('sql') || l.includes('cache') || l.includes('cassandra')) return 'Database';
+    if (l.includes('devops') || l.includes('deploy') || l.includes('docker') || l.includes('hosting') || l.includes('cloud') || l.includes('aws') || l.includes('gcp') || l.includes('cloudflare') || l.includes('ci/cd') || l.includes('k8s') || l.includes('infra') || l.includes('cluster') || l.includes('cdn')) return 'DevOps';
+    if (l.includes('test') || l.includes('qa') || l.includes('jest') || l.includes('cypress') || l.includes('playwright') || l.includes('k6')) return 'Testing';
     return null;
   }, [data.label]);
 
@@ -35,19 +47,12 @@ export function ArchitectureTierNode({ data, id }: { data: any; id: string }) {
   const nodeTech = useMemo(() => {
     if (!category) return [];
     return techStack.filter(t => {
-      // Map techStack categories to our keys
-      const cat = t.category || 'Backend';
-      if (cat === 'Frontend' && category === 'Frontend') return true;
-      if (cat === 'Backend' && category === 'Backend') return true;
-      if (cat === 'Database' && category === 'Database') return true;
-      if (cat === 'DevOps' && category === 'DevOps') return true;
-      if (cat === 'Testing' && category === 'Testing') return true;
-      
-      // Fallbacks in case category isn't set perfectly
-      if (category === 'Database' && (t.rationale?.toLowerCase().includes('database') || t.name.toLowerCase().includes('postgres') || t.name.toLowerCase().includes('mongo') || t.name.toLowerCase().includes('redis'))) return true;
+      // Map techStack categories strictly
+      if (t.category === category) return true;
       return false;
     });
   }, [techStack, category]);
+
 
   // Handle Drag Over & Drop
   const handleDragOver = (e: React.DragEvent) => {
@@ -116,13 +121,25 @@ export function ArchitectureTierNode({ data, id }: { data: any; id: string }) {
 
   // Icons based on category
   const categoryIcon = () => {
+    const cls = 'w-4 h-4';
     switch (category) {
-      case 'Frontend': return <LayoutDashboard className="w-4 h-4 text-pink-400" />;
-      case 'Backend': return <Server className="w-4 h-4 text-green-400" />;
-      case 'Database': return <Database className="w-4 h-4 text-blue-400" />;
-      case 'DevOps': return <Cloud className="w-4 h-4 text-cyan-400" />;
-      case 'Testing': return <Shield className="w-4 h-4 text-yellow-400" />;
-      default: return null;
+      case 'Frontend': return <LayoutDashboard className={`${cls} text-pink-400`} />;
+      case 'Backend': return <Server className={`${cls} text-emerald-400`} />;
+      case 'Database': return <Database className={`${cls} text-sky-400`} />;
+      case 'Auth': return <Lock className={`${cls} text-violet-400`} />;
+      case 'Payment': return <CreditCard className={`${cls} text-yellow-400`} />;
+      case 'Email': return <Mail className={`${cls} text-orange-400`} />;
+      case 'Storage': return <HardDrive className={`${cls} text-cyan-400`} />;
+      case 'Queue': return <Layers className={`${cls} text-indigo-400`} />;
+      case 'Analytics': return <BarChart2 className={`${cls} text-lime-400`} />;
+      case 'Monitoring': return <Activity className={`${cls} text-red-400`} />;
+      case 'Observability': return <Eye className={`${cls} text-teal-400`} />;
+      case 'Search': return <Search className={`${cls} text-fuchsia-400`} />;
+      case 'AI': return <Bot className={`${cls} text-blue-400`} />;
+      case 'Security': return <Shield className={`${cls} text-amber-400`} />;
+      case 'DevOps': return <Cloud className={`${cls} text-blue-500`} />;
+      case 'Testing': return <Zap className={`${cls} text-green-400`} />;
+      default: return <Code className={`${cls} text-zinc-500`} />;
     }
   };
 
