@@ -36,12 +36,15 @@ export function ArchitectureTierNode({ data, id }: { data: any; id: string }) {
     if (!category) return [];
     return techStack.filter(t => {
       // Map techStack categories to our keys
-      const cat = t.category || 'Frontend';
+      const cat = t.category || 'Backend';
       if (cat === 'Frontend' && category === 'Frontend') return true;
       if (cat === 'Backend' && category === 'Backend') return true;
-      if (category === 'Database' && (t.rationale?.toLowerCase().includes('database') || t.rationale?.toLowerCase().includes('sql') || t.rationale?.toLowerCase().includes('nosql') || t.name.toLowerCase().includes('postgres') || t.name.toLowerCase().includes('mongo') || t.name.toLowerCase().includes('redis') || t.name.toLowerCase().includes('prisma') || t.name.toLowerCase().includes('drizzle'))) return true;
+      if (cat === 'Database' && category === 'Database') return true;
       if (cat === 'DevOps' && category === 'DevOps') return true;
       if (cat === 'Testing' && category === 'Testing') return true;
+      
+      // Fallbacks in case category isn't set perfectly
+      if (category === 'Database' && (t.rationale?.toLowerCase().includes('database') || t.name.toLowerCase().includes('postgres') || t.name.toLowerCase().includes('mongo') || t.name.toLowerCase().includes('redis'))) return true;
       return false;
     });
   }, [techStack, category]);

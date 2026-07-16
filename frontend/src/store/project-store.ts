@@ -19,7 +19,7 @@ export interface TechItem {
   name: string;
   rationale: string;
   simpleIconSlug?: string;
-  category?: 'Frontend' | 'Backend' | 'Testing' | 'DevOps';
+  category?: 'Frontend' | 'Backend' | 'Testing' | 'DevOps' | 'Database';
   optional?: boolean;
 }
 

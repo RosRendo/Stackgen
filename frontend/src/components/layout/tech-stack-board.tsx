@@ -62,11 +62,12 @@ export function TechStackBoard() {
         name,
         rationale: entry ? `${entry.subcategory} — ${entry.category}` : 'Selected from encyclopedia',
         simpleIconSlug: entry?.slug,
-        category: (entry?.category === 'Web Frontend' ? 'Frontend' :
-                   entry?.category === 'Web Backend' ? 'Backend' :
-                   entry?.category === 'Testing' ? 'Testing' :
-                   entry?.category === 'DevOps & CI/CD' || entry?.category === 'Containers & K8s' ? 'DevOps' :
-                   'Frontend') as TechItem['category'],
+        category: (entry?.category === 'Web Frontend' || entry?.category === 'Mobile' || entry?.category === 'Design & UI' ? 'Frontend' :
+                   entry?.category === 'Web Backend' || entry?.category === 'Programming Languages' ? 'Backend' :
+                   entry?.category === 'Databases' || entry?.category === 'Messaging & Queues' ? 'Database' :
+                   entry?.category === 'Testing' || entry?.category === 'Monitoring' || entry?.category === 'Security' ? 'Testing' :
+                   entry?.category === 'DevOps & CI/CD' || entry?.category === 'Containers & K8s' || entry?.category === 'Cloud & Hosting' ? 'DevOps' :
+                   'Backend') as TechItem['category'],
         optional: false,
       };
       setGeneratedData({ techStack: [...techStack, newTech], checklist, nodes, edges });
