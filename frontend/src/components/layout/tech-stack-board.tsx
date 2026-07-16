@@ -206,31 +206,43 @@ export function TechStackBoard() {
             </Badge>
           </div>
 
-          {/* Selected Tech Preview */}
+          {/* Selected Tech Preview (Grouped by Category) */}
           {selectedTech.size > 0 && (
-            <div className="flex flex-wrap gap-1.5 p-2 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
-              {Array.from(selectedTech).map(name => {
-                const entry = TECH_ENCYCLOPEDIA.find(e => e.name === name);
-                return (
-                  <button
-                    key={name}
-                    onClick={() => toggleTech(name)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-300 transition-all group"
-                  >
-                    {entry?.slug && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`https://cdn.simpleicons.org/${entry.slug}/white`}
-                        alt=""
-                        className="w-3 h-3"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      />
-                    )}
-                    {name}
-                    <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                );
-              })}
+            <div className="flex flex-col gap-2 p-2 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+              {Object.entries(
+                Array.from(selectedTech).reduce((acc, name) => {
+                  const entry = TECH_ENCYCLOPEDIA.find(e => e.name === name);
+                  const cat = entry?.category || 'Other';
+                  if (!acc[cat]) acc[cat] = [];
+                  acc[cat].push({ name, entry });
+                  return acc;
+                }, {} as Record<string, { name: string, entry?: typeof TECH_ENCYCLOPEDIA[0] }[]>)
+              ).map(([cat, items]) => (
+                <div key={cat} className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider pl-1">{cat}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {items.map(({ name, entry }) => (
+                      <button
+                        key={name}
+                        onClick={() => toggleTech(name)}
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-300 transition-all group"
+                      >
+                        {entry?.slug && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={`https://cdn.simpleicons.org/${entry.slug}/white`}
+                            alt=""
+                            className="w-3 h-3"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        )}
+                        {name}
+                        <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
