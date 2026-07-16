@@ -195,86 +195,186 @@ export class AiService {
     }
   }
 
-  async generateTaskPrompt(taskTitle: string, techStack: string[], useMock: boolean = false) {
+  async generateTaskPrompt(ctx: {
+    taskTitle: string;
+    taskDescription?: string;
+    techStack: any[];
+    checklist?: any[];
+    projectName?: string;
+    projectDescription?: string;
+  }, useMock: boolean = false) {
+    const { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription } = ctx;
+
+    // Group tech by tier for structured context
+    const tierGroups: Record<string, string[]> = { Frontend: [], Backend: [], Database: [], DevOps: [], Testing: [] };
+    techStack.forEach(t => {
+      const cat = t.category || 'Backend';
+      if (tierGroups[cat]) tierGroups[cat].push(t.name);
+      else tierGroups['Backend'].push(t.name);
+    });
+
+    // Group checklist by category for structured context
+    const checklistByCategory: Record<string, string[]> = {};
+    (checklist || []).forEach(task => {
+      const cat = task.category || 'General';
+      if (!checklistByCategory[cat]) checklistByCategory[cat] = [];
+      checklistByCategory[cat].push(task.title);
+    });
+
+    const techSummary = Object.entries(tierGroups)
+      .filter(([, names]) => names.length > 0)
+      .map(([tier, names]) => `  [${tier}]: ${names.join(', ')}`)
+      .join('\n');
+
+    const checklistSummary = Object.entries(checklistByCategory)
+      .filter(([, tasks]) => tasks.length > 0)
+      .map(([cat, tasks]) => `  [${cat}]:\n${tasks.map(t => `    - ${t}`).join('\n')}`)
+      .join('\n');
+
     if (useMock || !process.env.GEMINI_API_KEY) {
-      const isDevOps = taskTitle.toLowerCase().includes('docker') || taskTitle.toLowerCase().includes('kubernetes') || taskTitle.toLowerCase().includes('cluster');
-      const isDb = taskTitle.toLowerCase().includes('postgres') || taskTitle.toLowerCase().includes('redis') || taskTitle.toLowerCase().includes('schema');
-      
+      const isDevOps = taskTitle.toLowerCase().includes('docker') || taskTitle.toLowerCase().includes('kubernetes') || taskTitle.toLowerCase().includes('cicd') || taskTitle.toLowerCase().includes('deploy');
+      const isDb = taskTitle.toLowerCase().includes('postgres') || taskTitle.toLowerCase().includes('redis') || taskTitle.toLowerCase().includes('schema') || taskTitle.toLowerCase().includes('database') || taskTitle.toLowerCase().includes('prisma');
+      const isBackend = taskTitle.toLowerCase().includes('api') || taskTitle.toLowerCase().includes('service') || taskTitle.toLowerCase().includes('nest') || taskTitle.toLowerCase().includes('auth');
+
       let dynamicTree = '';
       if (isDevOps) {
         dynamicTree = `project-root/
 ├── docker/
-│   ├── Dockerfile
+│   ├── Dockerfile.api
+│   ├── Dockerfile.frontend
 │   └── docker-compose.yml
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 └── kubernetes/
     ├── deployment.yaml
     └── service.yaml`;
       } else if (isDb) {
         dynamicTree = `project-root/
 ├── prisma/
-│   └── schema.prisma
+│   ├── schema.prisma
+│   └── seed.ts
 └── src/
     ├── database/
     │   └── db.module.ts
+    ├── repositories/
+    │   └── entity.repository.ts
     └── services/
         └── cache.service.ts`;
+      } else if (isBackend) {
+        dynamicTree = `project-root/
+└── src/
+    ├── modules/
+    │   └── feature/
+    │       ├── feature.module.ts
+    │       ├── feature.controller.ts
+    │       ├── feature.service.ts
+    │       └── dto/
+    │           └── create-feature.dto.ts
+    └── tests/
+        └── feature.service.spec.ts`;
       } else {
         dynamicTree = `project-root/
-├── src/
-│   ├── components/
-│   │   └── FeatureUI.tsx
-│   ├── services/
-│   │   └── feature.service.ts
-│   └── utils/
-│       └── helpers.ts
-└── tests/
-    └── feature.spec.ts`;
+└── src/
+    ├── components/
+    │   └── Feature/
+    │       ├── Feature.tsx
+    │       ├── Feature.test.tsx
+    │       └── index.ts
+    ├── hooks/
+    │   └── useFeature.ts
+    ├── services/
+    │   └── feature.api.ts
+    └── types/
+        └── feature.types.ts`;
       }
 
       return {
         data: {
-          prompt: `[NOTE: This is a mocked AI response because you are on the Free Tier or GEMINI_API_KEY is not set. Upgrade to a paid plan for dynamic, task-specific AI generation!]
+          prompt: `# AI Developer Prompt: ${taskTitle}
+${projectName ? `\n**Project:** ${projectName}` : ''}
+${projectDescription ? `**Description:** ${projectDescription}\n` : ''}
 
-You are an expert developer using ${techStack.join(', ')}.
+---
 
-Please implement the following task: "${taskTitle}"
+## 🏗️ Project Architecture (Tech Stack by Tier)
+\`\`\`
+${techSummary || '  No tech stack defined yet.'}
+\`\`\`
 
-Ensure you follow best practices for ${techStack.join(', ')} and break down the requirements into the following detailed tree structure:
+## 📋 Full Project Checklist (All Planned Steps by Category)
+${checklistSummary ? `\`\`\`\n${checklistSummary}\n\`\`\`` : '_No checklist generated yet._'}
 
+---
+
+## 🎯 Your Current Task
+**"${taskTitle}"**
+${taskDescription ? `\n${taskDescription}\n` : ''}
+
+---
+
+## 📁 File Structure to Create/Modify
 \`\`\`text
 ${dynamicTree}
 \`\`\`
 
-### Step-by-Step Instructions:
-1. **Prepare Environment for ${taskTitle}**
-  - [ ] Initialize necessary files based on the tree above.
-  - [ ] Configure environment variables.
+## ✅ Step-by-Step Implementation
 
-2. **Execute Core Logic**
-  - [ ] Implement the main functionality for ${taskTitle}.
-  - [ ] Integrate with the existing ${techStack[0] || 'framework'} architecture.
+### Phase 1 – Setup & Scaffolding
+- [ ] Scaffold the file structure shown above
+- [ ] Install any required dependencies
+- [ ] Configure environment variables
 
-3. **Verify and Deploy**
-  - [ ] Write tests covering edge cases.
-  - [ ] Ensure everything runs smoothly in the pipeline.`
+### Phase 2 – Core Implementation
+${tierGroups.Frontend.length > 0 ? `#### Frontend (${tierGroups.Frontend.join(', ')})\n- [ ] Build the UI components and connect to API\n- [ ] Handle loading/error states` : ''}
+${tierGroups.Backend.length > 0 ? `#### Backend (${tierGroups.Backend.join(', ')})\n- [ ] Implement the service/controller logic\n- [ ] Validate all inputs with DTOs/schemas` : ''}
+${tierGroups.Database.length > 0 ? `#### Database (${tierGroups.Database.join(', ')})\n- [ ] Write/update schema definitions\n- [ ] Create seed data for local development` : ''}
+${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\n- [ ] Update CI/CD configuration\n- [ ] Verify environment parity` : ''}
+
+### Phase 3 – Testing & Integration
+- [ ] Write unit tests for all new logic
+- [ ] Run integration tests and verify end-to-end flow
+- [ ] Check for edge cases and error boundaries
+
+### Phase 4 – Review & Deploy
+- [ ] Code review and cleanup
+- [ ] Open a pull request with a clear description
+- [ ] Deploy to staging and verify before production
+
+---
+> 💡 **[Free Tier Mock]** Upgrade to a paid plan for full AI-generated prompts tailored specifically to your task, tech stack, and project context.`
         },
         usage: 0
       };
     }
 
     const prompt = `
-      You are an expert Developer Assistant. The user needs to implement the following task: "${taskTitle}".
-      They are using the following tech stack: ${techStack.join(', ')}.
+      You are an expert Developer Assistant acting as a Senior Engineer.
+      The user is building a project called "${projectName || 'their project'}".
+      ${projectDescription ? `Project description: "${projectDescription}"` : ''}
 
-      Please generate a highly detailed, perfect prompt that the user can copy and paste into an AI coding assistant (like Cursor or GitHub Copilot) to execute this task perfectly.
-      The generated prompt MUST:
-      1. Instruct the AI to act as a senior engineer.
-      2. Explicitly mention the tech stack and specify best practices for them.
-      3. Deeply break down the requirements into a literal markdown file tree structure (using text-based tree characters like ├── and └──) showing the exact file paths to create/modify.
-      4. Provide a step-by-step implementation checklist.
-      
-      Return a JSON object ONLY with the following schema:
-      { "prompt": "the generated detailed prompt string containing the file tree structure and step-by-step checklist" }
+      ## Full Tech Stack (grouped by architectural tier):
+      ${techSummary}
+
+      ## Full Project Checklist (all planned tasks, by category):
+      ${checklistSummary || 'No checklist available.'}
+
+      ## The specific task to implement right now:
+      Title: "${taskTitle}"
+      ${taskDescription ? `Description: "${taskDescription}"` : ''}
+
+      Generate a highly detailed, structured developer prompt that the user can paste into Cursor, GitHub Copilot, or Claude to implement this task perfectly.
+
+      The prompt MUST:
+      1. Open with "You are a Senior [relevant role] engineer." as context for the AI.
+      2. List the full tech stack grouped by tier (Frontend, Backend, Database, DevOps) so the AI understands the complete architecture.
+      3. Reference how THIS task fits into the broader project checklist (mention which phase/category it belongs to, what comes before and after it).
+      4. Provide a detailed, text-based file tree (using ├── and └──) of exact files to create or modify.
+      5. Give a numbered, step-by-step implementation checklist broken down by tier (Frontend steps, Backend steps, Database steps, etc.) with markdown checkboxes.
+      6. End with a "Testing & Verification" section with specific test commands and what to verify.
+
+      Return ONLY a JSON object matching this schema:
+      { "prompt": "the full generated prompt as a markdown string" }
     `;
 
     try {

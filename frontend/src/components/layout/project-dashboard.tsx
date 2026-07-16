@@ -98,8 +98,12 @@ export function ProjectDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          taskTitle: task.title, 
-          techStack: techStack.map(t => t.name) 
+          taskTitle: task.title,
+          taskDescription: task.description,
+          techStack: techStack,
+          checklist: checklist,
+          projectName: projectName,
+          projectDescription: useProjectStore.getState().description,
         }),
       });
       const data = await res.json();

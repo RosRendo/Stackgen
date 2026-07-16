@@ -75,10 +75,13 @@ export class AiController {
     @Req() req: Request,
     @Body() dto: GenerateTaskPromptDto,
   ) {
-    const { taskTitle, techStack } = dto;
+    const { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription } = dto;
     const { user, isPaid, useMock } = await this.validateSessionAndTokens(req);
 
-    const result = await this.aiService.generateTaskPrompt(taskTitle, techStack, useMock);
+    const result = await this.aiService.generateTaskPrompt(
+      { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription },
+      useMock
+    );
 
     if (isPaid && result.usage > 0) {
       await this.prisma.user.update({

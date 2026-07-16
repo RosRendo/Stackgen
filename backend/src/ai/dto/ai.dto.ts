@@ -19,8 +19,24 @@ export class GenerateTaskPromptDto {
   @IsNotEmpty()
   taskTitle: string;
 
+  @IsOptional()
+  @IsString()
+  taskDescription?: string;
+
   @IsArray()
-  techStack: string[];
+  techStack: any[]; // we'll pass the full techStack items to group them
+
+  @IsOptional()
+  @IsArray()
+  checklist?: any[];
+
+  @IsOptional()
+  @IsString()
+  projectName?: string;
+
+  @IsOptional()
+  @IsString()
+  projectDescription?: string;
 }
 
 export class ChatDto {
