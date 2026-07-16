@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { initializePaddle, Paddle } from '@paddle/paddle-js';
+import { useEffect } from 'react';
 
 const tiers = [
   {
@@ -78,6 +80,18 @@ export function PricingSection() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [paddle, setPaddle] = useState<Paddle>();
+
+  useEffect(() => {
+    initializePaddle({ 
+      environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === 'sandbox' ? 'sandbox' : 'production', 
+      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '' 
+    }).then((paddleInstance: Paddle | undefined) => {
+        if (paddleInstance) {
+          setPaddle(paddleInstance);
+        }
+    });
+  }, []);
 
   const handleCheckout = async (tierName: string, href: string) => {
     if (tierName === 'Enterprise') {
@@ -95,25 +109,20 @@ export function PricingSection() {
       return;
     }
 
-    setLoadingTier(tierName);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/polar/checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ tier: tierName }),
+    if (tierName === 'Startup') {
+      paddle?.Checkout.open({
+        items: [{ priceId: process.env.NEXT_PUBLIC_PADDLE_STARTUP_PRICE_ID || '', quantity: 1 }],
+        customData: { userId: session.user.id }
       });
-      
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
-    } catch (err) {
-      console.error('Checkout error:', err);
-    } finally {
-      setLoadingTier(null);
+      return;
+    }
+
+    if (tierName === 'Professional') {
+      paddle?.Checkout.open({
+        items: [{ priceId: process.env.NEXT_PUBLIC_PADDLE_PROF_PRICE_ID || '', quantity: 1 }],
+        customData: { userId: session.user.id }
+      });
+      return;
     }
   };
 

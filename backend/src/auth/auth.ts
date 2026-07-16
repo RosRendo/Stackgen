@@ -44,7 +44,7 @@ export const auth = betterAuth({
       subscriptionStatus: {
         type: "string"
       },
-      polarCustomerId: {
+      paddleCustomerId: {
         type: "string",
         returned: false // Do not expose sensitive IDs to the frontend
       }

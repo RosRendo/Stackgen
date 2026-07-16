@@ -5,7 +5,7 @@ import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
-import { PolarModule } from './polar/polar.module';
+import { PaddleModule } from './paddle/paddle.module';
 
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -20,7 +20,7 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule, 
     PrismaModule, 
     ProjectsModule, 
-    PolarModule
+    PaddleModule
   ],
   controllers: [AppController],
   providers: [

@@ -26,7 +26,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/throttler": "^6.5.0",
-    "@polar-sh/sdk": "^0.48.1",
+    "@paddle/paddle-node-sdk": "^3.8.0",
     "@prisma/client": "^6.2.1",
     "@types/jszip": "^3.4.0",
     "better-auth": "^1.6.23",
