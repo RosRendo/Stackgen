@@ -368,10 +368,24 @@ ${dynamicTree}
   private getMockScan() {
     return {
       score: { overall: 75, security: 60, devops: 80, architecture: 85 },
+      techStack: [
+        { name: 'Node.js', simpleIconSlug: 'nodedotjs', category: 'Backend' },
+        { name: 'React', simpleIconSlug: 'react', category: 'Frontend' }
+      ],
       findings: [
         { category: 'Security', issue: 'Missing security best practices', impact: 'High' }
       ],
-      improvements: ['Add Dependabot', 'Setup GitHub Actions for CI']
+      checklist: [
+        { id: '1', title: 'Add Dependabot', status: 'TODO', category: 'DevOps', description: 'Enable Dependabot for automated security updates.', relatedTech: ['GitHub'] },
+        { id: '2', title: 'Setup GitHub Actions for CI', status: 'TODO', category: 'DevOps', description: 'Create a CI pipeline to run tests on PR.', relatedTech: ['GitHub Actions'] }
+      ],
+      nodes: [
+        { id: '1', position: { x: 250, y: 0 }, data: { label: 'GitHub Repo' } },
+        { id: '2', position: { x: 250, y: 150 }, data: { label: 'Node.js Backend' } }
+      ],
+      edges: [
+        { id: 'e1-2', source: '1', target: '2' }
+      ]
     };
   }
 
@@ -414,15 +428,19 @@ ${dynamicTree}
         Package.json content: ${packageJsonContent ? packageJsonContent : 'Not found or not a Node project.'}
 
         Based on standard best practices for ${packageJsonContent ? 'Node.js/JavaScript' : 'software engineering'}, generate a Production Readiness Score.
+        Also infer their Tech Stack from the package.json, generate an architectural diagram (nodes/edges), and provide an actionable remediation checklist.
         
-        Return ONLY valid JSON with this schema:
+        Return ONLY valid JSON with this exact schema:
         {
           "score": { "overall": number, "security": number, "devops": number, "architecture": number },
-          "findings": [
-            { "category": "Security|DevOps|Architecture", "issue": "string", "impact": "High|Medium|Low" }
-          ],
-          "improvements": ["string"]
+          "techStack": [ { "name": "string", "simpleIconSlug": "string (lowercase icon slug for simpleicons.org)", "category": "Frontend, Backend, Database, DevOps, Security, or Testing" } ],
+          "findings": [ { "category": "Security|DevOps|Architecture", "issue": "string", "impact": "High|Medium|Low" } ],
+          "checklist": [ { "id": "string", "category": "string", "title": "string", "description": "string", "relatedTech": ["string"], "status": "TODO" } ],
+          "nodes": [ { "id": "string", "position": { "x": number, "y": number }, "data": { "label": "string" } } ],
+          "edges": [ { "id": "string", "source": "string", "target": "string" } ]
         }
+        
+        For nodes, ensure distinct IDs and sequential positioning on the Y axis (y: 0, 150, 300) and X axis (x: 250). Do NOT return empty arrays if possible.
       `;
 
       const response = await this.ai.models.generateContent({
