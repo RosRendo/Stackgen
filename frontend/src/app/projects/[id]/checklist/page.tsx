@@ -58,8 +58,8 @@ export default function ProjectChecklistPage() {
     <div className="min-h-screen bg-zinc-950 p-6 md:p-12 flex flex-col">
       <div className="max-w-5xl mx-auto w-full space-y-6 flex-1 flex flex-col h-full">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-zinc-400" onClick={() => router.push('/')}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+          <Button variant="ghost" className="text-zinc-400" onClick={() => router.push(`/projects/${id}`)}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">{project.name}</h1>
