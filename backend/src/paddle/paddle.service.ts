@@ -19,7 +19,7 @@ export class PaddleService {
       }
 
       // Verify the webhook signature
-      const eventData = this.paddle.webhooks.unmarshal(rawBody, process.env.PADDLE_WEBHOOK_SECRET, signature);
+      const eventData = await this.paddle.webhooks.unmarshal(rawBody, process.env.PADDLE_WEBHOOK_SECRET, signature);
 
       if (eventData?.eventType === 'transaction.completed') {
         const transaction = eventData.data as any;

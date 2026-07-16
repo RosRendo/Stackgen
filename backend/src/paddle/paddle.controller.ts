@@ -1,6 +1,6 @@
 import { Controller, Post, Req, Res, Headers } from '@nestjs/common';
 import { PaddleService } from './paddle.service';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 @Controller('paddle')
 export class PaddleController {
