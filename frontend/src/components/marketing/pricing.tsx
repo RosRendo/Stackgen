@@ -29,7 +29,7 @@ const tiers = [
     name: 'Startup',
     id: 'tier-startup',
     href: '/auth',
-    priceMonthly: '$19',
+    priceMonthly: '$29',
     description: 'For indie hackers validating their ideas and shipping fast.',
     features: [
       '5 Active Projects',
@@ -43,7 +43,7 @@ const tiers = [
     name: 'Professional',
     id: 'tier-professional',
     href: '/auth',
-    priceMonthly: '$49',
+    priceMonthly: '$79',
     description: 'For serious developers shipping to production and scaling.',
     features: [
       'Unlimited Projects',
