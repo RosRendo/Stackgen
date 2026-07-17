@@ -45,7 +45,8 @@ export class AiController {
       }
     }
 
-    const useMock = !isPaid;
+    // Allow real AI generation for free users so they can experience the true tech stack output
+    const useMock = false;
 
     return { user, isPaid, useMock };
   }
