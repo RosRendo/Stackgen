@@ -103,6 +103,16 @@ export class PaddleService {
             }
           }
 
+          // Ensure the Customer exists before creating the Subscription to prevent P2003 foreign key errors
+          await this.prisma.customer.upsert({
+            where: { id: sub.customerId },
+            create: {
+              id: sub.customerId,
+              email: 'unknown@paddle.com', // Will be updated by customer.created or transaction.completed
+            },
+            update: {}
+          });
+
           await this.prisma.subscription.upsert({
             where: { id: sub.id },
             create: {
