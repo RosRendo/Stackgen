@@ -1065,7 +1065,7 @@ export function ProjectDashboard() {
 
       {/* Cost Estimator Dialog */}
       <Dialog open={isCostDialogOpen} onOpenChange={setIsCostDialogOpen}>
-        <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-xl">
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <DollarSign className="w-5 h-5 text-emerald-400" />
