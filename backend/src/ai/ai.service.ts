@@ -671,7 +671,13 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
       Your task is to write a massive, highly detailed "IMPLEMENTATION_GUIDE.md" file. 
       For EACH task in the checklist, write out the exact AI instructions, file structures, and code commands needed to implement it.
       
-      Format the output as a single cohesive Markdown document. Use headers (## Phase X / Task Y) to separate the tasks.
+      Format the output as a single cohesive Markdown document. 
+      
+      You MUST include the following sections at the very top before the tasks:
+      1. ## Projected Infrastructure Costs (Estimate monthly costs based on the tech stack)
+      2. ## VPS Deployment & Setup (Provide exact bash commands for Ubuntu/Debian to set up Docker, Nginx, UFW firewall, and PM2/Systemd if applicable to this stack)
+
+      Then, use headers (## Phase X / Task Y) to separate the tasks.
       Make sure to include specific commands and best practices based on the tech stack.
 
       Return ONLY a JSON object matching this schema:
