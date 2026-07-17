@@ -76,8 +76,32 @@ export class PaddleService {
         case 'subscription.canceled': {
           const sub = data as any;
           
-          const priceId = sub.items?.[0]?.price?.id || '';
-          const productId = sub.items?.[0]?.price?.productId || '';
+          let priceId = '';
+          let productId = '';
+          let tier = 'Free';
+
+          // Iterate through items to find our core subscription plan (ignoring addons)
+          if (sub.items && Array.isArray(sub.items)) {
+            for (const item of sub.items) {
+              const pId = item.price?.id;
+              if (pId === process.env.PADDLE_STARTUP_PRICE_ID) {
+                priceId = pId;
+                productId = item.price?.productId || item.price?.product_id || '';
+                tier = 'Startup';
+                break;
+              } else if (pId === process.env.PADDLE_PROF_PRICE_ID) {
+                priceId = pId;
+                productId = item.price?.productId || item.price?.product_id || '';
+                tier = 'Professional';
+                break;
+              }
+            }
+            // Fallback if no tier matched (e.g. they bought something else)
+            if (!priceId && sub.items.length > 0) {
+              priceId = sub.items[0].price?.id || '';
+              productId = sub.items[0].price?.productId || sub.items[0].price?.product_id || '';
+            }
+          }
 
           await this.prisma.subscription.upsert({
             where: { id: sub.id },
@@ -102,19 +126,18 @@ export class PaddleService {
           // Sync the legacy User fields for frontend UI
           const customer = await this.prisma.customer.findUnique({ where: { id: sub.customerId } });
           if (customer && customer.userId) {
-            let tier = 'Free';
+            let finalTier = 'Free';
             if (sub.status === 'active' || sub.status === 'trialing') {
-              if (priceId === process.env.PADDLE_STARTUP_PRICE_ID) tier = 'Startup';
-              else if (priceId === process.env.PADDLE_PROF_PRICE_ID) tier = 'Professional';
+              finalTier = tier;
             }
             await this.prisma.user.update({
               where: { id: customer.userId },
               data: {
-                subscriptionTier: tier,
+                subscriptionTier: finalTier,
                 subscriptionStatus: sub.status,
               }
             });
-            console.log(`Updated User ${customer.userId} to Tier: ${tier}, Status: ${sub.status}`);
+            console.log(`Updated User ${customer.userId} to Tier: ${finalTier}, Status: ${sub.status}`);
           }
           break;
         }
