@@ -1,10 +1,55 @@
-import { Controller, Post, Req, Res, Headers } from '@nestjs/common';
+import { Controller, Post, Get, Req, Res, Headers, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { PaddleService } from './paddle.service';
 import type { Request, Response } from 'express';
+import { auth } from '../auth/auth';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('paddle')
 export class PaddleController {
-  constructor(private readonly paddleService: PaddleService) {}
+  constructor(
+    private readonly paddleService: PaddleService,
+    private readonly prisma: PrismaService
+  ) {}
+
+  private async getUserId(req: Request) {
+    const session = await auth.api.getSession({
+      headers: req.headers as any
+    });
+    if (!session || !session.user) {
+      throw new UnauthorizedException('Not logged in');
+    }
+    return session.user.id;
+  }
+
+  @Get('portal-session')
+  async getPortalSession(@Req() req: Request) {
+    const userId = await this.getUserId(req);
+    
+    // Get user's paddle customer ID
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        customer: {
+          include: {
+            subscriptions: true
+          }
+        }
+      }
+    });
+
+    if (!user || !user.paddleCustomerId || !user.customer) {
+      throw new InternalServerErrorException('User does not have an active Paddle subscription');
+    }
+
+    try {
+      const subscriptionIds = user.customer.subscriptions.map(s => s.id);
+      const url = await this.paddleService.getPortalSession(user.paddleCustomerId, subscriptionIds);
+      return { url };
+    } catch (error) {
+      console.error('Error generating portal session', error);
+      throw new InternalServerErrorException('Could not generate portal session');
+    }
+  }
 
   @Post('webhook')
   async handleWebhook(

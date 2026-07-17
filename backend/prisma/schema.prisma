@@ -14,23 +14,23 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String   @unique
   emailVerified Boolean?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   paddleCustomerId   String?
-  subscriptionTier   String?   @default("Free")
-  subscriptionStatus String?   @default("inactive")
-  tokenBalance       Int       @default(10000)
+  subscriptionTier   String? @default("Free")
+  subscriptionStatus String? @default("inactive")
+  tokenBalance       Int     @default(10000)
 
-
-  sessions      Session[]
-  accounts      Account[]
-  projects      Project[]
+  sessions Session[]
+  accounts Account[]
+  projects Project[]
+  customer Customer?
 
   @@map("user")
 }
@@ -81,56 +81,86 @@ model Verification {
 }
 
 model Project {
-  id                String   @id @default(cuid())
-  name              String
-  description       String?
-  industry          String?
-  targetUsers       String?
-  traffic           String?
-  budget            String?
-  level             String   // MVP, Startup, Professional, Enterprise
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  industry    String?
+  targetUsers String?
+  traffic     String?
+  budget      String?
+  level       String // MVP, Startup, Professional, Enterprise
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Storing generated JSON data
-  techStack         Json?    
+  techStack         Json?
   architectureNodes Json?
   architectureEdges Json?
   costEstimate      Json?
   masterPlan        Json?
-  
-  tasks             Task[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+
+  tasks Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("project")
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  projectId   String
-  category    String   // Frontend, Backend, Security, DevOps
-  title       String
-  description String?
-  status      String   // TODO, IN_PROGRESS, DONE
-  priority    String   // LOW, MEDIUM, HIGH
-  difficulty  String?
-  estimatedTime String?
-  phase         String?
-  relatedTech   Json?
-  checklist     Json?
-  commands      Json?
-  files         Json?
-  learningNotes Json?
+  id              String  @id @default(cuid())
+  projectId       String
+  category        String // Frontend, Backend, Security, DevOps
+  title           String
+  description     String?
+  status          String // TODO, IN_PROGRESS, DONE
+  priority        String // LOW, MEDIUM, HIGH
+  difficulty      String?
+  estimatedTime   String?
+  phase           String?
+  relatedTech     Json?
+  checklist       Json?
+  commands        Json?
+  files           Json?
+  learningNotes   Json?
   expectedOutcome Json?
   commonErrors    Json?
   resources       Json?
-  
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("task")
+}
+
+model Customer {
+  id        String   @id // Paddle customer_id
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  subscriptions Subscription[]
+
+  @@map("customers")
+}
+
+model Subscription {
+  id                    String    @id // Paddle subscription_id
+  customerId            String
+  status                String // active, trialing, past_due, paused, canceled
+  priceId               String
+  productId             String
+  scheduledChangeAction String?
+  scheduledChangeAt     DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
