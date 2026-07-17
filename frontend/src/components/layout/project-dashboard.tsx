@@ -673,7 +673,7 @@ export function ProjectDashboard() {
             return (
               <>
                 {/* Header band */}
-                <div className={`px-6 pt-8 pb-5 ${colors.accent} border-b ${colors.border}`}>
+                <div className="px-6 pt-8 pb-5 border-b border-zinc-800/40">
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`w-2 h-2 rounded-full ${colors.dot}`} />
                     <span className={`text-xs font-bold uppercase tracking-widest ${colors.label}`}>{cat}</span>
@@ -707,7 +707,7 @@ export function ProjectDashboard() {
                   {(task.difficulty || task.estimatedTime) && (
                     <div className="flex items-center gap-4 text-xs font-medium text-zinc-400">
                       {task.difficulty && (
-                        <div className="flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900/50">
                           <span className={task.difficulty.toLowerCase() === 'beginner' ? 'text-green-400' : task.difficulty.toLowerCase() === 'intermediate' ? 'text-amber-400' : 'text-red-400'}>
                             ■
                           </span>
@@ -715,7 +715,7 @@ export function ProjectDashboard() {
                         </div>
                       )}
                       {task.estimatedTime && (
-                        <div className="flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900/50">
                           ⏱ Estimated Time: {task.estimatedTime}
                         </div>
                       )}
@@ -728,8 +728,8 @@ export function ProjectDashboard() {
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Uses</h4>
                       <div className="flex flex-wrap gap-2">
                         {task.relatedTech.map((tech, i) => (
-                          <span key={i} className={`text-xs font-medium px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${colors.step}`}>
-                            ✓ {tech}
+                          <span key={i} className={`text-xs font-medium px-2 py-0.5 rounded border border-zinc-800/60 bg-zinc-900/30 text-zinc-300 flex items-center gap-1.5`}>
+                            <span className={colors.label}>✓</span> {tech}
                           </span>
                         ))}
                       </div>
@@ -751,8 +751,7 @@ export function ProjectDashboard() {
                       <div className="space-y-3 pl-1">
                         {task.checklist.map((item, i) => (
                           <div key={i} className="flex items-start gap-3">
-                            <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center border-zinc-700 bg-zinc-900 shrink-0`}>
-                            </div>
+                            <div className="w-1.5 h-1.5 rounded-full mt-1.5 bg-zinc-600 shrink-0" />
                             <span className="text-sm text-zinc-300">{item}</span>
                           </div>
                         ))}
@@ -792,7 +791,7 @@ export function ProjectDashboard() {
 
                   {/* Learning Notes */}
                   {task.learningNotes && task.learningNotes.length > 0 && (
-                    <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                    <div className="bg-transparent border-l-2 border-blue-500/50 pl-4 py-1">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-3">Learning Notes</h4>
                       <ul className="space-y-2">
                         {task.learningNotes.map((note, i) => (
@@ -807,7 +806,7 @@ export function ProjectDashboard() {
 
                   {/* Expected Outcome */}
                   {task.expectedOutcome && task.expectedOutcome.length > 0 && (
-                    <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                    <div className="bg-transparent border-l-2 border-green-500/50 pl-4 py-1">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-400 mb-3">Expected Result</h4>
                       <ul className="space-y-2">
                         {task.expectedOutcome.map((outcome, i) => (
@@ -900,21 +899,21 @@ export function ProjectDashboard() {
                   {/* Step context (prev / next) */}
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">🗺️ Step Context</h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {prevTask && (
-                        <div className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/60 opacity-70">
-                          <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded mt-0.5 shrink-0">PREV</span>
+                        <div className="flex items-start gap-3 py-2 opacity-70">
+                          <span className="text-[10px] text-zinc-500 font-bold w-8 shrink-0">PREV</span>
                           <span className={`text-xs ${prevTask.status === 'DONE' ? 'line-through text-zinc-600' : 'text-zinc-400'}`}>{prevTask.title}</span>
                           {prevTask.status === 'DONE' && <span className="text-green-500 text-xs ml-auto shrink-0">✓</span>}
                         </div>
                       )}
-                      <div className={`flex items-start gap-3 p-3 rounded-lg border-2 ${colors.border} bg-zinc-900/60`}>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded mt-0.5 shrink-0 ${colors.step} border`}>NOW</span>
+                      <div className={`flex items-start gap-3 py-2 border-l-2 ${colors.border} pl-3 -ml-3.5`}>
+                        <span className={`text-[10px] font-bold ${colors.label} w-8 shrink-0`}>NOW</span>
                         <span className="text-xs text-zinc-200 font-medium">{task.title}</span>
                       </div>
                       {nextTask && (
-                        <div className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/20 border border-zinc-800/40 opacity-50">
-                          <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded mt-0.5 shrink-0">NEXT</span>
+                        <div className="flex items-start gap-3 py-2 opacity-50">
+                          <span className="text-[10px] text-zinc-500 font-bold w-8 shrink-0">NEXT</span>
                           <span className="text-xs text-zinc-500">{nextTask.title}</span>
                         </div>
                       )}
@@ -927,10 +926,10 @@ export function ProjectDashboard() {
                   <button
                     disabled={isDone}
                     onClick={() => { setSelectedTaskDetail(null); handleGeneratePrompt(task); }}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold text-sm transition-all ${
                       isDone 
                         ? 'opacity-30 cursor-not-allowed bg-zinc-800 text-zinc-600 border border-zinc-700'
-                        : `${colors.accent} ${colors.label} border-2 ${colors.border} hover:opacity-90`
+                        : `bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 hover:text-white hover:border-zinc-600`
                     }`}
                   >
                     <Terminal className="w-4 h-4" />
