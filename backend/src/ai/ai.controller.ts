@@ -4,7 +4,7 @@ import { AiService } from './ai.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
-import { GenerateBlueprintDto, GenerateTaskPromptDto, ChatDto, GenerateDocsDto, ScanGithubDto, EstimateCostDto, GenerateZipDto } from './dto/ai.dto';
+import { GenerateBlueprintDto, GenerateTaskPromptDto, ChatDto, GenerateDocsDto, ScanGithubDto, EstimateCostDto, GenerateZipDto, GenerateGuideDto } from './dto/ai.dto';
 
 @Controller('ai')
 export class AiController {
@@ -103,6 +103,32 @@ export class AiController {
   async generateDocs(@Body() dto: GenerateDocsDto) {
     const { projectName, description, techStack, nodes } = dto;
     return this.aiService.generateDocs(projectName, description, techStack, nodes);
+  }
+
+  @Post('generate-guide')
+  async generateGuide(
+    @Req() req: Request,
+    @Body() dto: GenerateGuideDto,
+  ) {
+    const { projectName, description, techStack, checklist } = dto;
+    const { user, isPaid, useMock } = await this.validateSessionAndTokens(req);
+
+    const result = await this.aiService.generateImplementationGuide(
+      projectName,
+      description,
+      techStack,
+      checklist,
+      useMock
+    );
+
+    if (isPaid && result.usage > 0) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { tokenBalance: { decrement: result.usage } }
+      });
+    }
+
+    return result.data;
   }
 
   @Post('scan-github')

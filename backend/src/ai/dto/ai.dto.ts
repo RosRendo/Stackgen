@@ -64,6 +64,22 @@ export class GenerateDocsDto {
   nodes: any[];
 }
 
+export class GenerateGuideDto {
+  @IsString()
+  @IsNotEmpty()
+  projectName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsArray()
+  techStack: any[];
+
+  @IsArray()
+  checklist: any[];
+}
+
 export class ScanGithubDto {
   @IsString()
   @IsNotEmpty()

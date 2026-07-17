@@ -646,6 +646,58 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
+  async generateImplementationGuide(projectName: string, description: string, techStack: any[], checklist: any[], useMock: boolean = false) {
+    if (!process.env.GEMINI_API_KEY || useMock) {
+      return {
+        data: { guide: `# ${projectName} - Implementation Guide\n\nThis is a mock guide because you are on a free tier or missing an API key. Upgrade to unlock full AI generation.` },
+        usage: 0
+      };
+    }
+
+    const techSummary = techStack.map(t => `- ${t.category}: ${t.name}`).join('\n');
+    const checklistSummary = checklist.map((t, i) => `${i + 1}. [${t.category}] ${t.title}`).join('\n');
+
+    const prompt = `
+      You are an expert Developer Assistant acting as a Senior Engineer.
+      The user is building a project called "${projectName}".
+      Description: "${description}"
+
+      ## Tech Stack:
+      ${techSummary}
+
+      ## Full Project Checklist:
+      ${checklistSummary}
+
+      Your task is to write a massive, highly detailed "IMPLEMENTATION_GUIDE.md" file. 
+      For EACH task in the checklist, write out the exact AI instructions, file structures, and code commands needed to implement it.
+      
+      Format the output as a single cohesive Markdown document. Use headers (## Phase X / Task Y) to separate the tasks.
+      Make sure to include specific commands and best practices based on the tech stack.
+
+      Return ONLY a JSON object matching this schema:
+      { "guide": "the full generated implementation guide as a markdown string" }
+    `;
+
+    try {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-1.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json'
+        }
+      });
+
+      const parsed = JSON.parse(response.text || '{}');
+      return {
+        data: parsed,
+        usage: 5000 // Charging 5000 tokens for this massive generation
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('Failed to generate implementation guide', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async generateDocs(projectName: string, description: string, techStack: any[], nodes: any[]) {
     if (!process.env.GEMINI_API_KEY) {
       return {

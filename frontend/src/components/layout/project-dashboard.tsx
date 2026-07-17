@@ -174,6 +174,41 @@ export function ProjectDashboard() {
 
   const [isExporting, setIsExporting] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
+  const [isExportingGuide, setIsExportingGuide] = useState(false);
+
+  const downloadFile = (filename: string, content: string) => {
+    const element = document.createElement('a');
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleExportGuide = async () => {
+    setIsExportingGuide(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/generate-guide`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName,
+          description: useProjectStore.getState().description,
+          techStack,
+          checklist
+        })
+      });
+      const data = await res.json();
+      if (data.guide) {
+        downloadFile('IMPLEMENTATION_GUIDE.md', data.guide);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsExportingGuide(false);
+    }
+  };
 
   const handleExportDocs = async () => {
     setIsExporting(true);
@@ -190,16 +225,6 @@ export function ProjectDashboard() {
       });
       const data = await res.json();
       
-      const downloadFile = (filename: string, content: string) => {
-        const element = document.createElement('a');
-        const file = new Blob([content], {type: 'text/plain'});
-        element.href = URL.createObjectURL(file);
-        element.download = filename;
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-      };
-
       downloadFile('README.md', data.readme);
       downloadFile('ARCHITECTURE.md', data.architecture);
     } catch (err) {
@@ -261,6 +286,10 @@ export function ProjectDashboard() {
           <Button variant="outline" onClick={handleGenerateZip} disabled={isZipping} className="bg-blue-600 hover:bg-blue-500 text-white border-blue-600">
             {isZipping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Download Boilerplate
+          </Button>
+          <Button variant="outline" onClick={handleExportGuide} disabled={isExportingGuide} className="bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 border-orange-600/50">
+            {isExportingGuide ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Terminal className="w-4 h-4 mr-2" />}
+            Export Full Guide
           </Button>
           <Button variant="outline" onClick={handleExportDocs} disabled={isExporting} className="bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-300">
             {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
