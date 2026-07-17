@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ReactFlow, Background, Controls, applyNodeChanges, type NodeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowRight, Save, Share2, Download, CheckCircle2, Circle, Clock, ChevronDown, Check, FolderGit2, Terminal, Code, Code2, Server, LayoutDashboard, Shield, Cloud, Loader2, Lock, CreditCard, Mail, HardDrive, Layers, BarChart2, Activity, Search, Bot, Eye, Zap, Database } from 'lucide-react';
+import { ArrowRight, Save, Share2, Download, CheckCircle2, Circle, Clock, ChevronDown, Check, FolderGit2, Terminal, Code, Code2, Server, LayoutDashboard, Shield, Cloud, Loader2, Lock, CreditCard, Mail, HardDrive, Layers, BarChart2, Activity, Search, Bot, Eye, Zap, Database, DollarSign } from 'lucide-react';
 import { TechStackBoard } from './tech-stack-board';
 import { ArchitectureTierNode } from './architecture-node';
 import { motion } from 'framer-motion';
@@ -175,6 +175,9 @@ export function ProjectDashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
   const [isExportingGuide, setIsExportingGuide] = useState(false);
+  const [isEstimatingCost, setIsEstimatingCost] = useState(false);
+  const [costEstimate, setCostEstimate] = useState<any>(null);
+  const [isCostDialogOpen, setIsCostDialogOpen] = useState(false);
 
   const downloadFile = (filename: string, content: string) => {
     const element = document.createElement('a');
@@ -207,6 +210,27 @@ export function ProjectDashboard() {
       console.error(err);
     } finally {
       setIsExportingGuide(false);
+    }
+  };
+
+  const handleEstimateCost = async () => {
+    setIsEstimatingCost(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/estimate-cost`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: complexity,
+          techStack
+        })
+      });
+      const data = await res.json();
+      setCostEstimate(data);
+      setIsCostDialogOpen(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsEstimatingCost(false);
     }
   };
 
@@ -283,6 +307,10 @@ export function ProjectDashboard() {
           </div>
         </div>
         <div className="flex gap-4">
+          <Button variant="outline" onClick={handleEstimateCost} disabled={isEstimatingCost} className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border-emerald-600/50">
+            {isEstimatingCost ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <DollarSign className="w-4 h-4 mr-2" />}
+            Estimate Costs
+          </Button>
           <Button variant="outline" onClick={handleGenerateZip} disabled={isZipping} className="bg-blue-600 hover:bg-blue-500 text-white border-blue-600">
             {isZipping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Download Boilerplate
@@ -1032,6 +1060,50 @@ export function ProjectDashboard() {
               </p>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cost Estimator Dialog */}
+      <Dialog open={isCostDialogOpen} onOpenChange={setIsCostDialogOpen}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <DollarSign className="w-5 h-5 text-emerald-400" />
+              Projected Infrastructure Costs
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400 mt-1">
+              Estimated monthly costs to run this stack in production.
+            </DialogDescription>
+          </DialogHeader>
+
+          {costEstimate && (
+            <div className="space-y-6 mt-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-sm font-medium text-emerald-400">Total Estimated Monthly Cost</span>
+                <span className="text-2xl font-bold text-emerald-300">${costEstimate.totalMonthly}</span>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-zinc-300">Cost Breakdown</h4>
+                {costEstimate.breakdown?.map((item: any, idx: number) => (
+                  <div key={idx} className="flex items-start justify-between p-3 rounded-md bg-zinc-900 border border-zinc-800">
+                    <div>
+                      <div className="text-sm font-medium text-zinc-200">{item.service}</div>
+                      <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
+                    </div>
+                    <div className="text-sm font-bold text-zinc-300">${item.cost}</div>
+                  </div>
+                ))}
+              </div>
+
+              {costEstimate.notes && (
+                <div className="p-3 rounded-md bg-blue-500/10 border border-blue-500/20">
+                  <div className="text-xs text-blue-400 font-medium mb-1">AI Recommendation</div>
+                  <div className="text-sm text-blue-300/80">{costEstimate.notes}</div>
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
