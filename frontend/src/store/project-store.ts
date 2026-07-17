@@ -65,6 +65,10 @@ interface ProjectState {
   }) => void;
   toggleTaskStatus: (taskId: string) => void;
   calculateProgress: () => void;
+
+  // Master Checklist State
+  masterChecklist: Record<string, boolean>;
+  toggleMasterChecklistItem: (key: string) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -79,6 +83,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   architectureNodes: [],
   architectureEdges: [],
   progress: 0,
+  masterChecklist: {},
 
   setProjectId: (id) => set({ projectId: id }),
 
@@ -115,6 +120,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     });
     get().calculateProgress();
   },
+
+  toggleMasterChecklistItem: (key) => set(state => ({
+    masterChecklist: {
+      ...state.masterChecklist,
+      [key]: !state.masterChecklist[key]
+    }
+  })),
 
   calculateProgress: () => {
     set((state) => {

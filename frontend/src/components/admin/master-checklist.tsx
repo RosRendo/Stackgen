@@ -11,6 +11,7 @@ import {
 import { TECH_ENCYCLOPEDIA } from '@/data/tech-stack-data';
 import { MASTER_CHECKLIST } from '@/data/master-checklist-data';
 import { useSearchParams } from 'next/navigation';
+import { useProjectStore } from '@/store/project-store';
 
 const LEVEL_WEIGHTS: Record<string, number> = {
   "MVP": 1,
@@ -77,9 +78,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
   const [localAiChecklist, setLocalAiChecklist] = useState<any[]>(aiChecklist || []);
 
   const [activeTab, setActiveTab] = useState<string>('ai-tasks');
-  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
-
-  const toggleItem = (key: string) => setCheckedItems(prev => ({ ...prev, [key]: !prev[key] }));
+  const { masterChecklist, toggleMasterChecklistItem } = useProjectStore();
   const toggleAiTask = (taskId: string) => {
     setLocalAiChecklist(prev => prev.map(t => t.id === taskId ? { ...t, status: t.status === 'DONE' ? 'TODO' : 'DONE' } : t));
   };
@@ -297,9 +296,10 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                     {(() => {
                       const totalItems = phase.sections.reduce((acc, sec) => acc + sec.items.length, 0);
                       let doneItems = 0;
-                      phase.sections.forEach((sec, sIdx) => {
-                        sec.items.forEach((_, iIdx) => {
-                           if (checkedItems[`${phase.id}-${sIdx}-${iIdx}`]) doneItems++;
+                      phase.sections.forEach((sec) => {
+                        sec.items.forEach((item) => {
+                           const itemKey = `${phase.id}|${sec.title}|${item.label}`;
+                           if (masterChecklist[itemKey]) doneItems++;
                         });
                       });
                       if (doneItems > 0) {
@@ -466,8 +466,8 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                       </h3>
                       <div className="flex flex-col">
                         {section.items.map((item, iIdx) => {
-                          const itemKey = `${phase.id}-${sIdx}-${iIdx}`;
-                          const isChecked = checkedItems[itemKey];
+                          const itemKey = `${phase.id}|${section.title}|${item.label}`;
+                          const isChecked = masterChecklist[itemKey];
                           const isCmd = itemHasCommand(item.label);
                           
                           return (
@@ -478,7 +478,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                                   ? 'hover:bg-zinc-900/10 opacity-70' 
                                   : 'hover:bg-zinc-900/30'
                               }`}
-                              onClick={() => toggleItem(itemKey)}
+                              onClick={() => toggleMasterChecklistItem(itemKey)}
                             >
                               <div className="mt-0.5 shrink-0">
                                 <div className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${isChecked ? 'bg-orange-500 border-orange-500' : 'bg-zinc-950 border-zinc-600 group-hover:border-orange-500/50'}`}>

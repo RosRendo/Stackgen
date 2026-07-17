@@ -59,7 +59,9 @@ export function ProjectDashboard() {
     architectureEdges,
     toggleTaskStatus,
     setProjectDetails,
-    setGeneratedData
+    setGeneratedData,
+    masterChecklist,
+    toggleMasterChecklistItem
   } = useProjectStore();
 
   const [selectedTech, setSelectedTech] = useState<TechItem | null>(null);
@@ -841,13 +843,14 @@ export function ProjectDashboard() {
                       Testing:  ['test', 'qa', 'e2e', 'unit', 'jest', 'cypress', 'spec', 'mock', 'coverage', 'playwright', 'vitest', 'k6'],
                     };
                     const keywords = catKeywords[cat] || [];
-                    const matchedSections: { sectionTitle: string; items: { label: string; required: boolean }[] }[] = [];
+                    const matchedSections: { phaseId: string; sectionTitle: string; items: { label: string; required: boolean }[] }[] = [];
 
                     MASTER_CHECKLIST.forEach(phase => {
                       phase.sections.forEach((section: any) => {
                         const stl = section.title.toLowerCase();
                         if (keywords.some(kw => stl.includes(kw))) {
                           matchedSections.push({
+                            phaseId: phase.id,
                             sectionTitle: section.title,
                             items: section.items.slice(0, 6), // max 6 items
                           });
@@ -867,15 +870,23 @@ export function ProjectDashboard() {
                                 {section.sectionTitle}
                               </div>
                               <ul className="space-y-2">
-                                {section.items.map((item: any, ii: number) => (
-                                  <li key={ii} className="flex items-start gap-2.5">
-                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 bg-zinc-600 shrink-0" />
-                                    <span className={`text-sm leading-relaxed ${item.required ? 'text-zinc-300' : 'text-zinc-500'}`}>
-                                      {item.label}
-                                      {!item.required && <span className="ml-1 text-[10px] text-zinc-500 italic">optional</span>}
-                                    </span>
-                                  </li>
-                                ))}
+                                {section.items.map((item: any, ii: number) => {
+                                  const itemKey = `${section.phaseId}|${section.sectionTitle}|${item.label}`;
+                                  const isChecked = masterChecklist[itemKey];
+                                  return (
+                                    <li key={ii} className="flex items-start gap-2.5">
+                                      <Checkbox
+                                        checked={isChecked}
+                                        onCheckedChange={() => toggleMasterChecklistItem(itemKey)}
+                                        className="mt-1 w-4 h-4 border-zinc-700 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 shrink-0"
+                                      />
+                                      <span className={`text-sm leading-relaxed ${isChecked ? 'text-zinc-600 line-through' : item.required ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                                        {item.label}
+                                        {!item.required && <span className="ml-1 text-[10px] text-zinc-500 italic">optional</span>}
+                                      </span>
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             </div>
                           ))}
