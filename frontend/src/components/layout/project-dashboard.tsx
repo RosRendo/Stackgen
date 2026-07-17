@@ -685,11 +685,11 @@ export function ProjectDashboard() {
                   </SheetTitle>
                   <div className="flex items-center gap-2 mt-3">
                     {isDone ? (
-                      <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full">✓ Completed</span>
+                      <span className="text-xs font-semibold text-green-400">✓ Completed</span>
                     ) : stepNum === 1 ? (
-                      <span className={`text-xs font-semibold border px-2.5 py-1 rounded-full ${colors.step}`}>▶ Start here</span>
+                      <span className={`text-xs font-semibold ${colors.label}`}>▶ Start here</span>
                     ) : (
-                      <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">Up next</span>
+                      <span className="text-xs font-semibold text-amber-400">Up next</span>
                     )}
                     <Checkbox
                       checked={isDone}
@@ -728,7 +728,7 @@ export function ProjectDashboard() {
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Uses</h4>
                       <div className="flex flex-wrap gap-2">
                         {task.relatedTech.map((tech, i) => (
-                          <span key={i} className={`text-xs font-medium px-2 py-0.5 rounded border border-zinc-800/60 bg-zinc-900/30 text-zinc-300 flex items-center gap-1.5`}>
+                          <span key={i} className="text-sm text-zinc-300 flex items-center gap-1.5">
                             <span className={colors.label}>✓</span> {tech}
                           </span>
                         ))}
@@ -778,9 +778,9 @@ export function ProjectDashboard() {
                   {task.files && task.files.length > 0 && (
                     <div>
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Files Created</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {task.files.map((file, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-zinc-300 bg-zinc-900/50 border border-zinc-800 px-3 py-2 rounded-md">
+                          <div key={i} className="flex items-center gap-2 text-sm text-zinc-300">
                             <span className="text-zinc-500 text-lg leading-none shrink-0">📄</span>
                             <span className="truncate">{file}</span>
                           </div>
@@ -860,23 +860,19 @@ export function ProjectDashboard() {
                     return (
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">✅ Master Checklist — Foundation Steps</h4>
-                        <div className="space-y-3">
+                        <div className="space-y-6">
                           {matchedSections.slice(0, 3).map((section, si) => (
-                            <div key={si} className={`rounded-xl border ${colors.border} bg-zinc-900/30 overflow-hidden`}>
-                              <div className={`px-3 py-2 text-xs font-semibold ${colors.label} ${colors.accent} border-b ${colors.border}`}>
+                            <div key={si}>
+                              <div className={`text-xs font-bold uppercase tracking-widest ${colors.label} mb-2`}>
                                 {section.sectionTitle}
                               </div>
-                              <ul className="divide-y divide-zinc-800/40">
+                              <ul className="space-y-2">
                                 {section.items.map((item: any, ii: number) => (
-                                  <li key={ii} className="flex items-start gap-2.5 px-3 py-2">
-                                    <div className={`w-3.5 h-3.5 rounded border shrink-0 mt-0.5 flex items-center justify-center ${
-                                      item.required ? `${colors.accent} ${colors.border}` : 'border-zinc-700 bg-zinc-900'
-                                    }`}>
-                                      {item.required && <div className={`w-1.5 h-1.5 rounded-sm ${colors.dot}`} />}
-                                    </div>
-                                    <span className={`text-xs leading-relaxed ${item.required ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                                  <li key={ii} className="flex items-start gap-2.5">
+                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 bg-zinc-600 shrink-0" />
+                                    <span className={`text-sm leading-relaxed ${item.required ? 'text-zinc-300' : 'text-zinc-500'}`}>
                                       {item.label}
-                                      {!item.required && <span className="ml-1 text-[9px] text-yellow-600/70 bg-yellow-900/20 px-1 rounded">optional</span>}
+                                      {!item.required && <span className="ml-1 text-[10px] text-zinc-500 italic">optional</span>}
                                     </span>
                                   </li>
                                 ))}
