@@ -98,6 +98,24 @@ export class PaddleService {
               scheduledChangeAt: sub.scheduledChange?.effectiveAt ? new Date(sub.scheduledChange.effectiveAt) : null,
             }
           });
+
+          // Sync the legacy User fields for frontend UI
+          const customer = await this.prisma.customer.findUnique({ where: { id: sub.customerId } });
+          if (customer && customer.userId) {
+            let tier = 'Free';
+            if (sub.status === 'active' || sub.status === 'trialing') {
+              if (priceId === process.env.PADDLE_STARTUP_PRICE_ID) tier = 'Startup';
+              else if (priceId === process.env.PADDLE_PROF_PRICE_ID) tier = 'Professional';
+            }
+            await this.prisma.user.update({
+              where: { id: customer.userId },
+              data: {
+                subscriptionTier: tier,
+                subscriptionStatus: sub.status,
+              }
+            });
+            console.log(`Updated User ${customer.userId} to Tier: ${tier}, Status: ${sub.status}`);
+          }
           break;
         }
 
