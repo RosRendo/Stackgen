@@ -406,17 +406,17 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                   ).map(([category, tasks]: [string, any], catIdx) => (
                     <div key={catIdx} className="space-y-4">
                       <h3 className="text-xs font-bold text-purple-400 uppercase tracking-widest pl-1 border-b border-zinc-800/50 pb-2">{category}</h3>
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="flex flex-col">
                         {tasks.map((task: any, idx: number) => (
-                          <div key={task.id || idx} className="flex items-start gap-4 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800 hover:border-purple-500/30 transition-all group shadow-sm">
+                          <div key={task.id || idx} className="flex items-start gap-3 py-3 border-b border-zinc-800/30 hover:bg-zinc-900/20 px-2 -mx-2 rounded-lg transition-all group">
                             <Checkbox 
                               checked={task.status === 'DONE'} 
                               onCheckedChange={() => task.id && toggleAiTask(task.id)}
-                              className="mt-1 w-5 h-5 border-zinc-700 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 shrink-0 rounded-[4px]"
+                              className="mt-0.5 w-4 h-4 border-zinc-700 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 shrink-0 rounded-[4px]"
                             />
-                            <div className="flex flex-col gap-1 w-full">
+                            <div className="flex flex-col w-full -mt-0.5">
                               <div className="flex items-start justify-between gap-4">
-                                <span className={`text-base font-semibold transition-all ${task.status === 'DONE' ? 'line-through text-zinc-500' : 'text-zinc-200 group-hover:text-purple-300'}`}>
+                                <span className={`text-sm font-medium transition-all ${task.status === 'DONE' ? 'line-through text-zinc-600' : 'text-zinc-200 group-hover:text-purple-300'}`}>
                                   {task.title}
                                 </span>
                                 {task.relatedTech && task.relatedTech.length > 0 && (
@@ -430,7 +430,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                                 )}
                               </div>
                               {task.description && (
-                                <p className={`text-sm leading-relaxed mt-1 ${task.status === 'DONE' ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                                <p className={`text-[13px] leading-relaxed mt-1.5 ${task.status === 'DONE' ? 'text-zinc-600' : 'text-zinc-400'}`}>
                                   {task.description}
                                 </p>
                               )}
@@ -464,7 +464,7 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                       <h3 className="text-sm font-bold text-orange-400/80 uppercase tracking-widest pl-1 border-b border-zinc-800/50 pb-2">
                         {section.title}
                       </h3>
-                      <div className="space-y-3">
+                      <div className="flex flex-col">
                         {section.items.map((item, iIdx) => {
                           const itemKey = `${phase.id}-${sIdx}-${iIdx}`;
                           const isChecked = checkedItems[itemKey];
@@ -473,29 +473,29 @@ export function MasterChecklist({ aiChecklist, projectName, projectLevel = "MVP"
                           return (
                             <div 
                               key={iIdx} 
-                              className={`flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer group shadow-sm ${
+                              className={`flex items-start gap-3 py-3 px-2 -mx-2 border-b border-zinc-800/30 transition-all cursor-pointer group rounded-lg ${
                                 isChecked 
-                                  ? 'bg-zinc-900/30 border-zinc-800/50' 
-                                  : 'bg-zinc-900/80 border-zinc-800 hover:border-orange-500/30 hover:bg-zinc-800/50'
+                                  ? 'hover:bg-zinc-900/10 opacity-70' 
+                                  : 'hover:bg-zinc-900/30'
                               }`}
                               onClick={() => toggleItem(itemKey)}
                             >
                               <div className="mt-0.5 shrink-0">
-                                <div className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${isChecked ? 'bg-orange-500 border-orange-500' : 'bg-zinc-950 border-zinc-600 group-hover:border-orange-500/50'}`}>
-                                  {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+                                <div className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${isChecked ? 'bg-orange-500 border-orange-500' : 'bg-zinc-950 border-zinc-600 group-hover:border-orange-500/50'}`}>
+                                  {isChecked && <Check className="w-3 h-3 text-white" />}
                                 </div>
                               </div>
-                              <div className="flex flex-col gap-1 w-full">
+                              <div className="flex flex-col w-full -mt-0.5">
                                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  {item.required && <span className="text-[10px] font-bold bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded">REQ</span>}
-                                  {item.optional && <span className="text-[10px] font-bold bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded">OPT</span>}
-                                  {isCmd && <span className="text-[10px] font-bold bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded">CMD</span>}
+                                  {item.required && <span className="text-[10px] font-bold text-red-500">REQ</span>}
+                                  {item.optional && <span className="text-[10px] font-bold text-yellow-500">OPT</span>}
+                                  {isCmd && <span className="text-[10px] font-bold text-cyan-500">CMD</span>}
                                 </div>
-                                <span className={`text-base font-medium transition-all ${isChecked ? 'text-zinc-600 line-through' : 'text-zinc-200 group-hover:text-white'}`}>
+                                <span className={`text-sm font-medium transition-all ${isChecked ? 'text-zinc-500 line-through' : 'text-zinc-200 group-hover:text-white'}`}>
                                   {item.label}
                                 </span>
                                 {item.desc && (
-                                  <span className={`text-sm mt-0.5 ${isChecked ? 'text-zinc-700 line-through' : 'text-zinc-400 group-hover:text-zinc-300'}`}>
+                                  <span className={`text-[13px] mt-1.5 leading-relaxed ${isChecked ? 'text-zinc-600 line-through' : 'text-zinc-400 group-hover:text-zinc-300'}`}>
                                     {item.desc}
                                   </span>
                                 )}
