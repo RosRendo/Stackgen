@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { Resend } from 'resend';
 
 const prisma = new PrismaClient({ log: ['info'] });
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_123');
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
