@@ -6,21 +6,20 @@ WORKDIR /app
 # Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Enable pnpm via corepack
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm globally
+RUN npm install -g pnpm@latest
 
-# Copy package files, lockfile, AND workspace config (required for pnpm build script approvals)
+# Copy package files, lockfile, and workspace config
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY prisma ./prisma/
 
-# Approve build scripts and install all dependencies
-RUN pnpm approve-builds --all || true
-RUN pnpm install
+# Install dependencies
+RUN pnpm install --no-frozen-lockfile
 
 # Copy application source code
 COPY . .
 
-# Generate Prisma Client and build the NestJS application
+# Generate Prisma Client and build NestJS
 RUN pnpm exec prisma generate
 RUN pnpm run build
 
@@ -31,16 +30,15 @@ WORKDIR /app
 
 # Install OpenSSL for runtime Prisma connection
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@latest
 
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 COPY prisma ./prisma/
 
-# Install only production dependencies
-RUN pnpm approve-builds --all || true
-RUN pnpm install --prod
+# Install only production dependencies (skip lifecycle scripts because devDependencies like prisma CLI are not present here)
+RUN pnpm install --prod --no-frozen-lockfile --ignore-scripts
 
-# Copy built artifacts from builder
+# Copy built artifacts and generated Prisma Client from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
