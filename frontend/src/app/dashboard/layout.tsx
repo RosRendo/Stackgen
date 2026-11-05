@@ -63,7 +63,7 @@ export default function DashboardLayout({
                 </Button>
               </Link>
               
-              {(session.user.email === 'admin@servicefinder.com' || session.user.email === 'test@example.com') && (
+              {(process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').toLowerCase().split(',').map(e => e.trim()).filter(Boolean).includes((session.user.email || '').toLowerCase()) && (
                 <Link href="/admin">
                   <Button variant="ghost" size="sm" className="h-8 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800">
                     Admin

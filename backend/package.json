@@ -20,13 +20,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@google/genai": "^2.11.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/throttler": "^6.5.0",
-    "@paddle/paddle-node-sdk": "^3.8.0",
     "@prisma/client": "^6.2.1",
     "@types/jszip": "^3.4.0",
     "better-auth": "^1.6.23",
@@ -76,6 +74,11 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^better-auth$": "<rootDir>/../test/better-auth-mock.ts",
+      "^better-auth/(.*)$": "<rootDir>/../test/better-auth-mock.ts",
+      "^@prisma/client$": "<rootDir>/../test/prisma-client-mock.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

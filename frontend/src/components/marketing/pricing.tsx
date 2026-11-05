@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { initializePaddle, Paddle } from '@paddle/paddle-js';
-import { useEffect } from 'react';
 
 const tiers = [
   {
@@ -80,49 +78,45 @@ export function PricingSection() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
-  const [paddle, setPaddle] = useState<Paddle>();
-
-  useEffect(() => {
-    initializePaddle({ 
-      environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === 'sandbox' ? 'sandbox' : 'production', 
-      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '' 
-    }).then((paddleInstance: Paddle | undefined) => {
-        if (paddleInstance) {
-          setPaddle(paddleInstance);
-        }
-    });
-  }, []);
 
   const handleCheckout = async (tierName: string, href: string) => {
     if (tierName === 'Enterprise') {
       window.location.href = href;
       return;
     }
-    
+
     if (!session) {
       router.push('/auth');
       return;
     }
-    
+
     if (tierName === 'MVP') {
       router.push('/dashboard');
       return;
     }
 
-    if (tierName === 'Startup') {
-      paddle?.Checkout.open({
-        items: [{ priceId: process.env.NEXT_PUBLIC_PADDLE_STARTUP_PRICE_ID || '', quantity: 1 }],
-        customData: { userId: session.user.id }
+    setLoadingTier(tierName);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lemonsqueezy/checkout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tierName === 'Professional' ? 'professional' : 'startup' })
       });
-      return;
-    }
 
-    if (tierName === 'Professional') {
-      paddle?.Checkout.open({
-        items: [{ priceId: process.env.NEXT_PUBLIC_PADDLE_PROF_PRICE_ID || '', quantity: 1 }],
-        customData: { userId: session.user.id }
-      });
-      return;
+      if (!res.ok) {
+        router.push('/auth');
+        return;
+      }
+
+      const { url } = await res.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch {
+      router.push('/auth');
+    } finally {
+      setLoadingTier(null);
     }
   };
 

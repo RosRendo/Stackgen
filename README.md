@@ -1,4 +1,4 @@
-# ? StackGen AI — AI CTO & Full-Stack Architecture Generator
+# ? StackGen AI ï¿½ AI CTO & Full-Stack Architecture Generator
 
 > Visual drag-and-drop system topology designer, Google Gemini boilerplate generator, production readiness scanner, and instant ZIP export.
 
@@ -10,11 +10,11 @@
 ---
 
 ## ??? Architecture Topology
+- **Frontend Builder**: Next.js 16, React 19, Tailwind CSS 4, @xyflow/react, Better-Auth Client (Port 3005)
 
-- **Frontend Builder**: Next.js 16, React 19, Tailwind CSS 4, @xyflow/react, Better-Auth Client, Paddle.js (Port 3005)
-- **Backend Generator Engine**: NestJS 11, Google Gemini AI (@google/genai), Prisma 6, JSZip / FileSaver (Port 3001)
-- **Database & Storage**: PostgreSQL 16 with Prisma ORM
-- **Payments & Subscriptions**: Paddle Billing Gateway integration
+- **Backend Generator Engine**: NestJS 11, Multi-provider AI gateway (Google Gemini, OpenAI, Anthropic, Groq, DeepSeek, OpenRouter â€” with model switching + auto-fallback), Prisma 6, JSZip / FileSaver (Port 3001)
+- **Database & Storage**: Supabase (PostgreSQL) with Prisma ORM
+- **Payments & Subscriptions**: Lemon Squeezy gateway integration (hosted checkout + webhooks)
 
 ---
 
@@ -45,4 +45,4 @@ npm run dev -- -p 3005
 ---
 
 ## ?? License
-Private & Proprietary — Ros Rendo
+Private & Proprietary ï¿½ Ros Rendo

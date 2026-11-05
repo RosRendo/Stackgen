@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Req, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request } from 'express';
 import { AiService } from './ai.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
+import { aiGateway } from './model-gateway';
 import { GenerateBlueprintDto, GenerateTaskPromptDto, ChatDto, GenerateDocsDto, ScanGithubDto, EstimateCostDto, GenerateZipDto, GenerateGuideDto } from './dto/ai.dto';
 
 @Controller('ai')
@@ -13,7 +14,12 @@ export class AiController {
     private readonly prisma: PrismaService
   ) {}
 
-  private async validateSessionAndTokens(req: Request) {
+  @Get('models')
+  listModels() {
+    return aiGateway.listModels();
+  }
+
+  private async getSession(req: Request) {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers)
     });
@@ -30,8 +36,18 @@ export class AiController {
       throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
     }
 
-    const isPaid = user.subscriptionStatus === 'active' || user.subscriptionTier !== 'Free';
-    
+    return user;
+  }
+
+  private isPaidUser(user: { subscriptionStatus?: string | null; subscriptionTier?: string | null }): boolean {
+    return user.subscriptionStatus === 'active' || (!!user.subscriptionTier && user.subscriptionTier !== 'Free');
+  }
+
+  private async validateSessionAndTokens(req: Request) {
+    const user = await this.getSession(req);
+
+    const isPaid = this.isPaidUser(user);
+
     if (isPaid && user.tokenBalance <= 0) {
       throw new HttpException('Insufficient tokens. Please upgrade your plan.', HttpStatus.PAYMENT_REQUIRED);
     }
@@ -45,10 +61,7 @@ export class AiController {
       }
     }
 
-    // Allow real AI generation for free users so they can experience the true tech stack output
-    const useMock = false;
-
-    return { user, isPaid, useMock };
+    return { user, isPaid };
   }
 
   @Post('generate-blueprint')
@@ -57,9 +70,10 @@ export class AiController {
     @Body() dto: GenerateBlueprintDto,
   ) {
     const { projectName, description, level } = dto;
-    const { user, isPaid, useMock } = await this.validateSessionAndTokens(req);
+    const { user, isPaid } = await this.validateSessionAndTokens(req);
 
-    const result = await this.aiService.generateBlueprint(projectName, description, level, useMock);
+    // Free users' AI calls are pinned to the free FreeLLM router (no paid tokens burned)
+    const result = await this.aiService.generateBlueprint(projectName, description, level, isPaid ? dto.model : 'auto');
 
     if (isPaid && result.usage > 0) {
       await this.prisma.user.update({
@@ -77,11 +91,11 @@ export class AiController {
     @Body() dto: GenerateTaskPromptDto,
   ) {
     const { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription } = dto;
-    const { user, isPaid, useMock } = await this.validateSessionAndTokens(req);
+    const { user, isPaid } = await this.validateSessionAndTokens(req);
 
     const result = await this.aiService.generateTaskPrompt(
       { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription },
-      useMock
+      isPaid ? dto.model : 'auto'
     );
 
     if (isPaid && result.usage > 0) {
@@ -95,15 +109,28 @@ export class AiController {
   }
 
   @Post('chat')
-  async chat(@Body() dto: ChatDto) {
-    const { message, context } = dto;
-    return this.aiService.chat(message, context);
+  async chat(@Req() req: Request, @Body() dto: ChatDto) {
+    const user = await this.getSession(req);
+    const isPaid = this.isPaidUser(user);
+
+    if (isPaid) {
+      if (user.tokenBalance <= 0) {
+        throw new HttpException('Insufficient tokens. Please upgrade your plan.', HttpStatus.PAYMENT_REQUIRED);
+      }
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { tokenBalance: { decrement: 100 } }
+      });
+    }
+
+    return this.aiService.chat(dto.message, dto.context, isPaid ? dto.model : 'auto');
   }
 
   @Post('generate-docs')
-  async generateDocs(@Body() dto: GenerateDocsDto) {
-    const { projectName, description, techStack, nodes } = dto;
-    return this.aiService.generateDocs(projectName, description, techStack, nodes);
+  async generateDocs(@Req() req: Request, @Body() dto: GenerateDocsDto) {
+    const user = await this.getSession(req);
+    const model = this.isPaidUser(user) ? dto.model : 'auto';
+    return this.aiService.generateDocs(dto.projectName, dto.description, dto.techStack, dto.nodes, model);
   }
 
   @Post('generate-guide')
@@ -111,15 +138,14 @@ export class AiController {
     @Req() req: Request,
     @Body() dto: GenerateGuideDto,
   ) {
-    const { projectName, description, techStack, checklist } = dto;
-    const { user, isPaid, useMock } = await this.validateSessionAndTokens(req);
+    const { user, isPaid } = await this.validateSessionAndTokens(req);
 
     const result = await this.aiService.generateImplementationGuide(
-      projectName,
-      description,
-      techStack,
-      checklist,
-      useMock
+      dto.projectName,
+      dto.description,
+      dto.techStack,
+      dto.checklist,
+      isPaid ? dto.model : 'auto'
     );
 
     if (isPaid && result.usage > 0) {
@@ -133,19 +159,31 @@ export class AiController {
   }
 
   @Post('scan-github')
-  async scanGithub(@Body() dto: ScanGithubDto) {
-    return this.aiService.scanGithub(dto.githubUrl);
+  async scanGithub(@Req() req: Request, @Body() dto: ScanGithubDto) {
+    const user = await this.getSession(req);
+    return this.aiService.scanGithub(dto.githubUrl, this.isPaidUser(user) ? dto.model : 'auto');
   }
 
   @Post('estimate-cost')
-  async estimateCost(@Body() dto: EstimateCostDto) {
-    const { level, techStack } = dto;
-    return this.aiService.estimateCost(level, techStack);
+  async estimateCost(@Req() req: Request, @Body() dto: EstimateCostDto) {
+    const user = await this.getSession(req);
+    return this.aiService.estimateCost(dto.level, dto.techStack, this.isPaidUser(user) ? dto.model : 'auto');
   }
 
   @Post('generate-zip')
-  async generateZip(@Body() dto: GenerateZipDto) {
-    const { projectName, techStack } = dto;
-    return this.aiService.generateBoilerplate(projectName, techStack);
+  async generateZip(@Req() req: Request, @Body() dto: GenerateZipDto) {
+    const user = await this.getSession(req);
+    const isPaid = user.subscriptionStatus === 'active' || (user.subscriptionTier && user.subscriptionTier !== 'Free') ? true : false;
+
+    if (!isPaid) {
+      throw new HttpException('Boilerplate export is available on paid plans. Please upgrade your plan.', HttpStatus.PAYMENT_REQUIRED);
+    }
+
+    if (user.tokenBalance <= 0) {
+      throw new HttpException('Insufficient tokens. Please upgrade your plan.', HttpStatus.PAYMENT_REQUIRED);
+    }
+
+    const { projectName, techStack, model } = dto;
+    return this.aiService.generateBoilerplate(projectName, techStack, model);
   }
 }

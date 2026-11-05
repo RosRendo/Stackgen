@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
         destination: "https://stackgen.dashboardkiller.online/ai/:path*",
       },
       {
-        source: "/paddle/:path*",
-        destination: "https://stackgen.dashboardkiller.online/paddle/:path*",
+        source: "/lemonsqueezy/:path*",
+        destination: "https://stackgen.dashboardkiller.online/lemonsqueezy/:path*",
       },
     ];
   },

@@ -152,6 +152,7 @@ export function ProjectDashboard() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/generate-task-prompt`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           taskTitle: task.title,
@@ -194,6 +195,7 @@ export function ProjectDashboard() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/generate-guide`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectName,
@@ -218,6 +220,7 @@ export function ProjectDashboard() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/estimate-cost`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           level: complexity,
@@ -239,6 +242,7 @@ export function ProjectDashboard() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/generate-docs`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectName,
@@ -263,6 +267,7 @@ export function ProjectDashboard() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/generate-zip`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectName, techStack })
       });

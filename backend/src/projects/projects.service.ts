@@ -1,5 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { isAdminEmail } from '../common/admin';
 
 @Injectable()
 export class ProjectsService {
@@ -8,7 +9,7 @@ export class ProjectsService {
   async saveProject(userId: string, data: any) {
     try {
       const user = await this.prisma.user.findUnique({ where: { id: userId } });
-      const isAdmin = user?.email === 'rousrendo@gmail.com';
+      const isAdmin = isAdminEmail(user?.email);
       const isPaid = user?.subscriptionStatus === 'active' || (user?.subscriptionTier && user?.subscriptionTier !== 'Free' && user?.subscriptionTier !== 'MVP');
       
       if (!isPaid && !isAdmin) {

@@ -31,23 +31,15 @@ export default function AdminDashboard() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    // Admin Guard
-    if (!isPending) {
-      if (!session) {
-        router.push('/');
-        return;
-      }
-      const isAdmin = session.user?.email?.toLowerCase() === 'rousrendo@gmail.com';
-      if (!isAdmin) {
-        router.push('/');
-        return;
-      }
+    // Admin access is enforced by the backend API; unauthorized users are redirected
+    if (!isPending && !session) {
+      router.push('/');
     }
   }, [session, isPending, router]);
 
   useEffect(() => {
     if (isPending || !session) return;
-    
+
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/admin/all`, {
       credentials: 'include'
     })
@@ -56,8 +48,9 @@ export default function AdminDashboard() {
         if (Array.isArray(data)) {
           setProjects(data);
         } else {
-          console.error('Expected array from backend, got:', data);
-          setProjects([]);
+          // Not authorized (backend decides via ADMIN_EMAILS)
+          router.push('/');
+          return;
         }
         setLoading(false);
       })
@@ -65,7 +58,7 @@ export default function AdminDashboard() {
         console.error(err);
         setLoading(false);
       });
-  }, [isPending, session]);
+  }, [isPending, session, router]);
 
   if (loading) {
     return <div className="flex h-screen items-center justify-center text-zinc-400">Loading all enterprise data...</div>;

@@ -1,6 +1,12 @@
 import { IsString, IsNotEmpty, IsArray, IsOptional } from 'class-validator';
 
-export class GenerateBlueprintDto {
+export class ModelField {
+  @IsOptional()
+  @IsString()
+  model?: string;
+}
+
+export class GenerateBlueprintDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   projectName: string;
@@ -14,7 +20,7 @@ export class GenerateBlueprintDto {
   level: string;
 }
 
-export class GenerateTaskPromptDto {
+export class GenerateTaskPromptDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   taskTitle: string;
@@ -39,7 +45,7 @@ export class GenerateTaskPromptDto {
   projectDescription?: string;
 }
 
-export class ChatDto {
+export class ChatDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   message: string;
@@ -48,7 +54,7 @@ export class ChatDto {
   context?: any;
 }
 
-export class GenerateDocsDto {
+export class GenerateDocsDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   projectName: string;
@@ -64,7 +70,7 @@ export class GenerateDocsDto {
   nodes: any[];
 }
 
-export class GenerateGuideDto {
+export class GenerateGuideDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   projectName: string;
@@ -80,13 +86,13 @@ export class GenerateGuideDto {
   checklist: any[];
 }
 
-export class ScanGithubDto {
+export class ScanGithubDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   githubUrl: string;
 }
 
-export class EstimateCostDto {
+export class EstimateCostDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   level: string;
@@ -95,7 +101,7 @@ export class EstimateCostDto {
   techStack: any[];
 }
 
-export class GenerateZipDto {
+export class GenerateZipDto extends ModelField {
   @IsString()
   @IsNotEmpty()
   projectName: string;

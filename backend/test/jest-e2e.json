@@ -5,5 +5,10 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^better-auth$": "<rootDir>/better-auth-mock.ts",
+    "^better-auth/(.*)$": "<rootDir>/better-auth-mock.ts",
+    "^@prisma/client$": "<rootDir>/prisma-client-mock.ts"
   }
 }

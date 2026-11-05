@@ -208,6 +208,7 @@ export function ProjectWizard() {
             <motion.button
               onClick={handleGenerate}
               disabled={!desc}
+              aria-label="Generate architecture"
               whileHover={(!desc) ? {} : { scale: 1.05 }}
               whileTap={(!desc) ? {} : { scale: 0.95 }}
               className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-all ${

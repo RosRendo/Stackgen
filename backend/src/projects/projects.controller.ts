@@ -2,6 +2,7 @@ import { Controller, Post, Get, Param, Body, Req, UnauthorizedException } from '
 import { ProjectsService } from './projects.service';
 import type { Request } from 'express';
 import { auth } from '../auth/auth';
+import { isAdminEmail } from '../common/admin';
 
 @Controller('projects')
 export class ProjectsController {
@@ -22,7 +23,7 @@ export class ProjectsController {
     const session = await auth.api.getSession({
       headers: req.headers as any
     });
-    if (!session || !session.user || session.user.email.toLowerCase() !== 'rousrendo@gmail.com') {
+    if (!session || !session.user || !isAdminEmail(session.user.email)) {
       throw new UnauthorizedException('Admin access required');
     }
     return this.projectsService.getAllProjectsForAdmin();

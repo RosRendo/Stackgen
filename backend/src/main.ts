@@ -18,9 +18,13 @@ async function bootstrap() {
   }));
 
   // Strict CORS for production (fallback to localhost for dev)
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://softwarebp.com', 'https://stackgen.site', 'https://www.stackgen.site']
-    : ['http://localhost:3000'];
+  const extraOrigins = (process.env.TRUSTED_ORIGINS || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_URL || 'https://localhost:3000', ...extraOrigins]
+    : ['http://localhost:3000', ...extraOrigins];
 
   app.enableCors({
     origin: allowedOrigins,

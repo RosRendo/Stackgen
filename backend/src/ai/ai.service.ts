@@ -1,15 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { GoogleGenAI } from '@google/genai';
+import { aiGateway } from './model-gateway';
 
 @Injectable()
 export class AiService {
-  private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY || 'dummy_key',
-    });
+  private async llm(model: string | undefined, prompt: string, json = true) {
+    return aiGateway.generateText({ requested: model, prompt, json });
   }
+
 
   private getMockBlueprint(level: string) {
     // ─── shared helpers ───────────────────────────────────────────
@@ -349,8 +346,8 @@ export class AiService {
   }
 
 
-  async generateBlueprint(projectName: string, description: string, level: string, useMock: boolean = false) {
-    if (useMock || !process.env.GEMINI_API_KEY) {
+  async generateBlueprint(projectName: string, description: string, level: string, model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return { data: this.getMockBlueprint(level), usage: 0 };
     }
 
@@ -398,13 +395,7 @@ export class AiService {
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json"
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       const parsedData = JSON.parse(response.text || '{}');
 
@@ -425,7 +416,7 @@ export class AiService {
     checklist?: any[];
     projectName?: string;
     projectDescription?: string;
-  }, useMock: boolean = false) {
+  }, model?: string) {
     const { taskTitle, taskDescription, techStack, checklist, projectName, projectDescription } = ctx;
 
     // Group tech by tier for structured context
@@ -454,7 +445,7 @@ export class AiService {
       .map(([cat, tasks]) => `  [${cat}]:\n${tasks.map(t => `    - ${t}`).join('\n')}`)
       .join('\n');
 
-    if (useMock || !process.env.GEMINI_API_KEY) {
+    if (!aiGateway.hasAnyProvider()) {
       const isDevOps = taskTitle.toLowerCase().includes('docker') || taskTitle.toLowerCase().includes('kubernetes') || taskTitle.toLowerCase().includes('cicd') || taskTitle.toLowerCase().includes('deploy');
       const isDb = taskTitle.toLowerCase().includes('postgres') || taskTitle.toLowerCase().includes('redis') || taskTitle.toLowerCase().includes('schema') || taskTitle.toLowerCase().includes('database') || taskTitle.toLowerCase().includes('prisma');
       const isBackend = taskTitle.toLowerCase().includes('api') || taskTitle.toLowerCase().includes('service') || taskTitle.toLowerCase().includes('nest') || taskTitle.toLowerCase().includes('auth');
@@ -601,13 +592,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       const parsed = JSON.parse(response.text || '{}');
       return {
@@ -620,9 +605,9 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
-  async chat(message: string, context: any) {
-    if (!process.env.GEMINI_API_KEY) {
-      return { reply: `I am your CTO Assistant. You said: "${message}". Please add a Gemini API Key to get real AI responses!` };
+  async chat(message: string, context: any, model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
+      return { reply: `I am your CTO Assistant. You said: "${message}". Add at least one AI provider API key (GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.) to get real AI responses!` };
     }
 
     const systemPrompt = `
@@ -634,10 +619,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `${systemPrompt}\n\nUser: ${message}`
-      });
+      const response = await this.llm(model, `${systemPrompt}\n\nUser: ${message}`, false);
 
       return { reply: response.text };
     } catch (error) {
@@ -646,8 +628,8 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
-  async generateImplementationGuide(projectName: string, description: string, techStack: any[], checklist: any[], useMock: boolean = false) {
-    if (!process.env.GEMINI_API_KEY || useMock) {
+  async generateImplementationGuide(projectName: string, description: string, techStack: any[], checklist: any[], model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return {
         data: { guide: `# ${projectName} - Implementation Guide\n\nThis is a standard template guide. Upgrade to unlock full AI generation.` },
         usage: 0
@@ -685,13 +667,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       const parsed = JSON.parse(response.text || '{}');
       return {
@@ -704,8 +680,8 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
-  async generateDocs(projectName: string, description: string, techStack: any[], nodes: any[]) {
-    if (!process.env.GEMINI_API_KEY) {
+  async generateDocs(projectName: string, description: string, techStack: any[], nodes: any[], model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return {
         readme: `# ${projectName}\n\n${description}\n\n## Tech Stack\n${techStack.map(t => `- ${t.name}`).join('\n')}`,
         architecture: `# Architecture\n\nGenerated for ${projectName}.`
@@ -728,13 +704,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       return JSON.parse(response.text || '{}');
     } catch (error) {
@@ -770,22 +740,18 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     };
   }
 
-  async scanGithub(githubUrl: string) {
-    if (!process.env.GEMINI_API_KEY) {
+  async scanGithub(githubUrl: string, model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return this.getMockScan();
     }
 
     try {
-      let owner = '';
-      let repo = '';
-      const urlParts = githubUrl.split('github.com/');
-      if (urlParts.length > 1) {
-        const pathParts = urlParts[1].split('/');
-        owner = pathParts[0];
-        repo = pathParts[1].replace('.git', '');
-      } else {
+      const match = githubUrl.match(/^https?:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)\/?$/);
+      if (!match) {
         throw new Error('Invalid GitHub URL');
       }
+      const owner = match[1];
+      const repo = match[2].replace('.git', '');
 
       let packageJsonContent = '';
       try {
@@ -824,13 +790,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
         For nodes, ensure distinct IDs and sequential positioning on the Y axis (y: 0, 150, 300) and X axis (x: 250). Do NOT return empty arrays if possible.
       `;
 
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       return JSON.parse(response.text || '{}');
     } catch (error) {
@@ -839,8 +799,8 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
-  async estimateCost(level: string, techStack: any[]) {
-    if (!process.env.GEMINI_API_KEY) {
+  async estimateCost(level: string, techStack: any[], model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return {
         totalMonthly: 45,
         breakdown: [
@@ -869,13 +829,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       return JSON.parse(response.text || '{}');
     } catch (error) {
@@ -891,8 +845,8 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     }
   }
 
-  async generateBoilerplate(projectName: string, techStack: any[]) {
-    if (!process.env.GEMINI_API_KEY) {
+  async generateBoilerplate(projectName: string, techStack: any[], model?: string) {
+    if (!aiGateway.hasAnyProvider()) {
       return {
         files: [
           { path: 'package.json', content: '{\n  "name": "starter-app"\n}' },
@@ -916,13 +870,7 @@ ${tierGroups.DevOps.length > 0 ? `#### DevOps (${tierGroups.DevOps.join(', ')})\
     `;
 
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const response = await this.llm(model, prompt);
 
       return JSON.parse(response.text || '{}');
     } catch (error) {

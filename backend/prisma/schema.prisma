@@ -22,7 +22,7 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  paddleCustomerId   String?
+  squeezyCustomerId   String?
   subscriptionTier   String? @default("Free")
   subscriptionStatus String? @default("inactive")
   tokenBalance       Int     @default(10000)
@@ -136,7 +136,7 @@ model Task {
 }
 
 model Customer {
-  id        String   @id // Paddle customer_id
+  id        String   @id // Lemon Squeezy customer_id
   email     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -150,11 +150,12 @@ model Customer {
 }
 
 model Subscription {
-  id                    String    @id // Paddle subscription_id
+  id                    String    @id // Lemon Squeezy subscription_id
   customerId            String
-  status                String // active, trialing, past_due, paused, canceled
+  status                String // active, on_trial, past_due, paused, cancelled, expired
   priceId               String
   productId             String
+  portalUrl             String?
   scheduledChangeAction String?
   scheduledChangeAt     DateTime?
   createdAt             DateTime  @default(now())

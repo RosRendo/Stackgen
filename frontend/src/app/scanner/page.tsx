@@ -37,23 +37,31 @@ export default function ScannerPage() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
     setLoading(true);
     setResult(null);
+    setError(null);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/scan-github`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ githubUrl: url })
       });
+      if (res.status === 401) {
+        setError('Please log in to use the scanner.');
+        return;
+      }
       const data = await res.json();
       setResult(data);
     } catch (err) {
       console.error(err);
+      setError('Scan failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -104,6 +112,15 @@ export default function ScannerPage() {
             </form>
           </CardContent>
         </Card>
+
+        {error && !loading && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300 flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4" /> {error}
+            {error.startsWith('Please log in') && (
+              <Link href="/auth" className="ml-2 underline text-red-200">Log in</Link>
+            )}
+          </div>
+        )}
 
         {loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-32 gap-4">
